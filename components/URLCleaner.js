@@ -1,22 +1,19 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 
 export default function URLCleaner() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   useEffect(() => {
-    // 1. Sekme Başlığını Değiştir (Görselde istediğin "EV" yazısı için)
-    document.title = "EV | ToggSUV"; 
-
-    // 2. URL'deki parametreleri temizle (Sadece domain kalsın diye)
+    // URL'de ?brand=... gibi bir parametre varsa temizle
     if (searchParams.toString()) {
-      // window.location.pathname genellikle "/" döndürür. 
-      // Bu sayede adres çubuğu sadece toggsuv.com olur.
-      window.history.replaceState(null, '', window.location.pathname);
+      // Sayfayı yenilemeden sadece URL'i (toggsuv.com) yapar
+      window.history.replaceState(null, '', pathname);
     }
-  }, [searchParams]);
+  }, [searchParams, pathname]);
 
   return null;
 }

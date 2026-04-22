@@ -1,6 +1,7 @@
 // app/layout.js
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { Suspense } from 'react'; // 1. Adım: Suspense'i import et
 import URLCleaner from '@/components/URLCleaner';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -15,7 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr" className="scroll-smooth"> 
       <body className={inter.className}>
         {/* URL'yi canlıda temizleyen bileşen */}
-        <URLCleaner />
+        <Suspense fallback={null}>
+          <URLCleaner />
+        </Suspense>
         <nav className="bg-[#0b1120] text-white p-4 sticky top-0 z-50 border-b border-gray-800">
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center gap-2">
