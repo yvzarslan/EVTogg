@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Suspense } from 'react'; // 1. Adım: Suspense'i import et
 import URLCleaner from '@/components/URLCleaner';
+import MobileMenu from '@/components/MobileMenu'; // Menüyü içe aktar
+import ScrollToTop from '@/components/ScrollToTop'; // 1. Adım: Import et
 
 const inter = Inter({ subsets: ['latin'] });
 // SEKMEDE YAZACAK BAŞLIK BURADA TANIMLANIR
@@ -30,9 +32,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="#haberler" className="hover:text-blue-400">Haberler</a> 
               <a href="#sarj" className="hover:text-blue-400">Şarj Noktaları</a>
             </div>
+            <MobileMenu />
           </div>
         </nav>
         {children}
+        <ScrollToTop />
       </body>
     </html>
   );
