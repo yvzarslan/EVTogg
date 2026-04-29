@@ -3,6 +3,7 @@ import FilterBar from '@/components/FilterBar';
 import EVCard from '@/components/EVCard';
 import NewsSection from '@/components/NewsSection';
 import ChargingMap from '@/components/ChargingMap';
+import ComparisonWrapper from '@/components/ComparisonWrapper'; // Yeni eklenen sarmalayıcı
 import { scrapeEVData } from '@/lib/scraper';
 
 // ISR: Veriyi 24 saatte bir arka planda yeniler
@@ -51,8 +52,17 @@ export default async function HomePage({ searchParams }) {
              Elektrikli Araçlar
           </h2>
         </div>
-
-        {/* Grid yapısı: Mobilde 1, Tablette 2, Masaüstünde 4 sütun */}
+{         displayCars.length > 0 ? (
+          /* ÖNEMLİ: Client-side state yönetimi (seçilen araçlar, alt bar)
+             için tüm grid yapısını ComparisonWrapper yönetir.
+          */
+          <ComparisonWrapper displayCars={displayCars} />
+        ) : (
+          <div className="col-span-full text-center py-20 bg-white rounded-[3xl] border border-dashed border-slate-300 text-slate-400">
+             Seçilen kriterlerde uygun araç bulunamadı.
+          </div>
+        )}
+        {/* Grid yapısı: Mobilde 1, Tablette 2, Masaüstünde 4 sütun 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {displayCars.length > 0 ? (
             displayCars.map((car) => (
@@ -64,7 +74,7 @@ export default async function HomePage({ searchParams }) {
             </div>
           )}
         </div>
-         
+         */}
       </section>
       <section id="haberler">  
       {/* 4. Haberler ve Video İncelemeleri */}

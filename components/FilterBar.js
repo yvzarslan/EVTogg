@@ -8,7 +8,7 @@ export default function FilterBar({ initialBrands = [], currentFilters }) {
 
   const [filters, setFilters] = useState({
     brand: currentFilters.brand || "",
-    range: currentFilters.range || 600,
+    range: currentFilters.range || 660,
     accel: currentFilters.accel || 10,
   });
 
