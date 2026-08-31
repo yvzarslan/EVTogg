@@ -32,7 +32,7 @@ export default async function HomePage({ searchParams }) {
 
   return (
     <main className="bg-[#f8fafc] min-h-screen pb-20">
-      {/* 1. Giriş Alanı (Togg Animasyonlu) */}
+      {/* 1. Giriş Alanı (EVCar Animasyonlu) */}
      <section id="hero">
       <Hero />
        </section>

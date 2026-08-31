@@ -7,7 +7,7 @@ export default function ComparisonWrapper({ displayCars }) {
   const [selectedCars, setSelectedCars] = useState([]);
   const router = useRouter();
 
-  const toggleSelection = (car) => {
+  const evcarleSelection = (car) => {
     setSelectedCars((prev) => {
       const isSelected = prev.find((c) => c.id === car.id);
       if (isSelected) return prev.filter((c) => c.id !== car.id);
@@ -29,7 +29,7 @@ export default function ComparisonWrapper({ displayCars }) {
             key={car.id} 
             car={car} 
             isSelected={selectedCars.some(c => c.id === car.id)}
-            onSelect={() => toggleSelection(car)} 
+            onSelect={() => evcarleSelection(car)} 
           />
         ))}
       </div>
@@ -41,8 +41,8 @@ export default function ComparisonWrapper({ displayCars }) {
               {selectedCars.map((car) => (
                 <div key={car.id} className="relative bg-slate-50 p-2 pr-8 rounded-xl border flex items-center gap-2">
                   <img src={car.image} className="w-10 h-8 object-contain" alt="" />
-                  <span className="text-xs font-bold truncate max-w-[80px]">{car.model}</span>
-                  <button onClick={() => toggleSelection(car)} className="absolute right-2 text-red-500 font-bold">✕</button>
+                  <span className="text-xs font-bold truncate max-w-[80]">{car.model}</span>
+                  <button onClick={() => evcarleSelection(car)} className="absolute right-2 text-red-500 font-bold">✕</button>
                 </div>
               ))}
             </div>

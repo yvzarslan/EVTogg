@@ -11,7 +11,7 @@ export default function Hero() {
         transition={{ duration: 1 }}
         className="absolute inset-0 z-0"
       >
-        <img src="/togg.jpg" className="w-full h-full object-cover object-scale-down" alt="Togg"  />
+        <img src="/EVCar.jpeg" className="w-full h-full object-cover object-scale-down" alt="EVCar"  />
       </motion.div>
       
       <div className="relative z-10 text-center text-white p-4">

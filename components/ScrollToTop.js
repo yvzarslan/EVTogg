@@ -6,7 +6,7 @@ export default function ScrollToTop() {
 
   // Sayfa kaydırma miktarını kontrol et
   useEffect(() => {
-    const toggleVisibility = () => {
+    const evcarVisibility = () => {
       if (window.scrollY > 300) {
         setIsVisible(true);
       } else {
@@ -14,8 +14,8 @@ export default function ScrollToTop() {
       }
     };
 
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
+    window.addEventListener("scroll", evcarVisibility);
+    return () => window.removeEventListener("scroll", evcarVisibility);
   }, []);
 
   const scrollToTop = () => {
