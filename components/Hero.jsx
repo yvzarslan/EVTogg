@@ -22,7 +22,7 @@ export default function Hero() {
         >
           Elektrikli Gelecek Burada
         </motion.h1>
-        <p className="text-xl opacity-90 mb-50">Türkiye nin En Kapsamlı Elektrikli Araç Platformu</p>
+        <p className="text-xl opacity-90 mb-80">Elektrikli Araçları Karşılaştırmanın Kolay Yolu</p>
         {/*<button className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-md transition-all">Keşfet</button>*/}
       </div>
     </section>

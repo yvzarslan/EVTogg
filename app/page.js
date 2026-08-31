@@ -86,7 +86,10 @@ export default async function HomePage({ searchParams }) {
       </section>  
       {/* 6. Footer (Opsiyonel Basit Bir Kapanış) */}
       <footer className="container mx-auto px-4 mt-20 pt-10 border-t border-slate-200 text-center text-slate-500 text-sm">
-        <p>© 2026 - Elektrikli Araç Platformu. Tüm hakları saklıdır.</p>
+        <p>© 2026 - Elektrikli Araç Platformu. Tüm hakları saklıdır.
+          
+        </p>
+        <p>Bağımsız bir platformdur. Herhangi bir otomotiv markası, üretici, distribütör veya yetkili satıcı ile resmî bağlantısı bulunmamaktadır. Sitede kullanılan marka ve model adları yalnızca bilgilendirme ve karşılaştırma amacıyla kullanılmaktadır. Tüm marka ve fikrî mülkiyet hakları ilgili hak sahiplerine aittir.</p>
       </footer>
     </main>
   );
