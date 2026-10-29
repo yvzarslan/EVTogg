@@ -1,7 +1,10 @@
 import Image from "next/image";
 import { vehicleSpecifications } from "@/lib/vehicleSpecifications";
+import { useLanguage } from "./LanguageProvider";
+import { getMessage, getSpecificationLabel, getVehicleValue } from "@/lib/i18n";
 
 export default function EVCard({ car, isSelected, onSelect }) {
+  const { language } = useLanguage();
   if (!car) return null;
 
   return (
@@ -44,8 +47,8 @@ export default function EVCard({ car, isSelected, onSelect }) {
         <div className="grid flex-1 grid-cols-2 gap-2">
           {vehicleSpecifications.map(({ label, key }) => (
             <div key={key} className="min-w-0 rounded-xl bg-slate-50 p-3">
-              <span className="block text-[10px] font-bold leading-tight text-slate-500">{label}</span>
-              <b className="mt-1 block break-words text-sm text-slate-900">{car[key] || "—"}</b>
+              <span className="block text-[10px] font-bold leading-tight text-slate-500">{getSpecificationLabel(language, key) || label}</span>
+              <b className="mt-1 block break-words text-sm text-slate-900">{getVehicleValue(language, car, key) || "—"}</b>
             </div>
           ))}
         </div>
@@ -53,7 +56,7 @@ export default function EVCard({ car, isSelected, onSelect }) {
         <button className={`mt-6 w-full rounded-2xl py-3 text-xs font-black uppercase tracking-[0.14em] transition-all ${
           isSelected ? 'bg-red-50 text-red-600' : 'bg-slate-900 text-white hover:bg-blue-600'
         }`}>
-          {isSelected ? 'LİSTEDEN ÇIKAR' : 'KIYASLAMAYA EKLE'}
+          {getMessage(language, isSelected ? "removeFromCompare" : "addToCompare")}
         </button>
       </div>
     </div>

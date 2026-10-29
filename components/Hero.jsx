@@ -2,8 +2,12 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { showChargingStations } from '@/lib/features';
+import { useLanguage } from './LanguageProvider';
+import { getMessage } from '@/lib/i18n';
 
 export default function Hero() {
+  const { language } = useLanguage();
+
   return (
     <section className="relative h-[80vh] min-h-[520px] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.35),_transparent_30%),linear-gradient(135deg,#020817_0%,#0f172a_40%,#1d4ed8_100%)]">
       <motion.div
@@ -23,7 +27,7 @@ export default function Hero() {
           animate={{ y: 0, opacity: 1 }}
           className="text-4xl font-black tracking-tight sm:text-5xl lg:text-7xl"
         >
-          Elektrikli Gelecek <span className="text-blue-300">Burada</span>
+          {getMessage(language, "heroTitle")} <span className="text-blue-300">{getMessage(language, "heroTitleAccent")}</span>
         </motion.h1>
 
         <motion.p
@@ -32,7 +36,7 @@ export default function Hero() {
           transition={{ delay: 0.2 }}
           className="mx-auto mt-5 max-w-2xl text-base text-slate-200 sm:text-xl"
         >
-          Elektrikli araçları kolayca karşılaştır ve en uygun modeli keşfet.
+          {getMessage(language, "heroSubtitle")}
         </motion.p>
 
         <motion.div
@@ -42,11 +46,11 @@ export default function Hero() {
           className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <a href="#araclar" className="inline-flex items-center justify-center rounded-full bg-blue-500 px-6 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(59,130,246,0.5)] transition hover:bg-blue-400">
-            Araçları Gör
+            {getMessage(language, "viewVehicles")}
           </a>
           {showChargingStations && (
             <a href="#sarj" className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/5 px-6 py-3 text-sm font-black text-white backdrop-blur-sm transition hover:bg-white/10">
-              Şarj Noktaları
+              {getMessage(language, "chargingStations")}
             </a>
           )}
         </motion.div>
@@ -57,11 +61,9 @@ export default function Hero() {
           transition={{ delay: 0.35 }}
           className="mt-10 flex flex-wrap items-center justify-center gap-3"
         >
-          {['120+ Model'].map((item) => (
-            <div key={item} className="rounded-2xl border border-white/15 bg-white/5 px-5 py-3 backdrop-blur-sm">
-              <div className="text-sm font-black text-white">{item}</div>
-            </div>
-          ))}
+          <div className="rounded-2xl border border-white/15 bg-white/5 px-5 py-3 backdrop-blur-sm">
+            <div className="text-sm font-black text-white">{getMessage(language, "modelCount")}</div>
+          </div>
         </motion.div>
       </div>
     </section>

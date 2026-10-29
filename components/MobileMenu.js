@@ -1,9 +1,12 @@
 "use client";
 import { useState } from 'react';
 import { showChargingStations, showVehicleNews } from '@/lib/features';
+import { useLanguage } from './LanguageProvider';
+import { getMessage } from '@/lib/i18n';
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const { language } = useLanguage();
 
   return (
     <div className="relative md:hidden">
@@ -11,7 +14,7 @@ export default function MobileMenu() {
         type="button"
         onClick={() => setIsOpen((value) => !value)}
         className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-blue-300 transition hover:bg-white/10 focus:outline-none"
-        aria-label="Mobil menü"
+        aria-label={getMessage(language, "mobileMenu")}
         aria-expanded={isOpen}
       >
         {isOpen ? (
@@ -29,8 +32,8 @@ export default function MobileMenu() {
         <div className="absolute right-0 top-[calc(100%+0.75rem)] w-[220px] overflow-hidden rounded-2xl border border-slate-700 bg-slate-950/95 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
           <div className="flex flex-col divide-y divide-slate-800">
             {[
-              ['Haberler', '#haberler', showVehicleNews],
-              ['Şarj Noktaları', '#sarj', showChargingStations],
+              [getMessage(language, "news"), '#haberler', showVehicleNews],
+              [getMessage(language, "chargingStations"), '#sarj', showChargingStations],
             ].map(([label, href, enabled = true]) => enabled && (
               <a
                 key={label}

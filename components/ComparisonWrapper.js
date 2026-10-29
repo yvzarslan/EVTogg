@@ -3,10 +3,13 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import EVCard from "./EVCard";
+import { useLanguage } from "./LanguageProvider";
+import { getMessage } from "@/lib/i18n";
 
 export default function ComparisonWrapper({ displayCars }) {
   const [selectedCars, setSelectedCars] = useState([]);
   const router = useRouter();
+  const { language } = useLanguage();
 
   const evcarleSelection = (car) => {
     setSelectedCars((prev) => {
@@ -56,7 +59,7 @@ export default function ComparisonWrapper({ displayCars }) {
               onClick={goToCompare}
               className="w-full rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_16px_40px_rgba(59,130,246,0.4)] transition hover:bg-blue-500 md:w-auto"
             >
-              KARŞILAŞTIR ({selectedCars.length})
+              {getMessage(language, "compare")} ({selectedCars.length})
             </button>
           </div>
         </div>

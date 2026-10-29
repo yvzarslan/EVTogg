@@ -6,6 +6,8 @@ import ComparisonWrapper from '@/components/ComparisonWrapper';
 import { scrapeEVData } from '@/lib/scraper';
 import { showChargingStations, showVehicleNews } from '@/lib/features';
 import { bodyStyleLabels, segmentLabels } from '@/lib/vehicleFilters';
+import { cookies } from 'next/headers';
+import { defaultLanguage, getMessage, normalizeLanguage } from '@/lib/i18n';
 
 export const revalidate = 86400;
 
@@ -25,6 +27,7 @@ const matchesFilters = (car, filters) => {
 
 export default async function HomePage({ searchParams }) {
   const params = await searchParams;
+  const language = normalizeLanguage((await cookies()).get('ev-platform-language')?.value || defaultLanguage);
 
   const filters = {
     brand: params.brand || '',
@@ -75,7 +78,7 @@ export default async function HomePage({ searchParams }) {
         <div className="flex items-center gap-3 mb-10">
           <div className="w-2 h-10 bg-blue-600 rounded-full"></div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Elektrikli Araçlar
+            {getMessage(language, 'vehicleList')}
           </h2>
         </div>
 
@@ -83,7 +86,7 @@ export default async function HomePage({ searchParams }) {
           <ComparisonWrapper displayCars={displayCars} />
         ) : (
           <div className="col-span-full text-center py-20 bg-white rounded-[3xl] border border-dashed border-slate-300 text-slate-400">
-            Seçilen kriterlerde uygun araç bulunamadı.
+            {getMessage(language, 'noMatchingCars')}
           </div>
         )}
       </section>
@@ -104,16 +107,16 @@ export default async function HomePage({ searchParams }) {
         <div className="grid gap-5 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-[0_30px_80px_-45px_rgba(37,99,235,0.75)] backdrop-blur-sm md:grid-cols-3">
           {[
             {
-              title: 'Hızlı karşılaştırma',
-              text: 'Marka, menzil ve 0-100 değerlerine göre en uygun modelleri tek ekranda gör.',
+              title: getMessage(language, 'featureComparison'),
+              text: getMessage(language, 'featureComparisonDescription'),
             },
             ...(showChargingStations ? [{
-              title: 'Şarj görünürlüğü',
-              text: 'İstanbul merkezli şarj noktalarını hızlıca keşfet ve yol planlamanı kolaylaştır.',
+              title: getMessage(language, 'featureCharging'),
+              text: getMessage(language, 'featureChargingDescription'),
             }] : []),
             {
-              title: 'Güncel takip',
-              text: 'Piyasadaki yeni modeller, haberler ve trendler tek bir platformdan takip edilebiliyor.',
+              title: getMessage(language, 'featureUpdates'),
+              text: getMessage(language, 'featureUpdatesDescription'),
             },
           ].map((item) => (
             <div key={item.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -135,31 +138,31 @@ export default async function HomePage({ searchParams }) {
               </div>
             </div>
             <p className="max-w-md text-sm leading-6 text-slate-300">
-              Elektrikli araçlar için net karşılaştırma ve güncel içerik sunan modern bir rehber.
+              {getMessage(language, 'footerDescription')}
             </p>
           </div>
 
           <div>
-            <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">Menü</h4>
+            <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">{getMessage(language, 'footerMenu')}</h4>
             <ul className="space-y-2 text-sm text-slate-300">
-              <li><a href="#hero" className="transition hover:text-white">Ana Sayfa</a></li>
-              <li><a href="#araclar" className="transition hover:text-white">Araçlar</a></li>
-              {showVehicleNews && <li><a href="#haberler" className="transition hover:text-white">Haberler</a></li>}
-              {showChargingStations && <li><a href="#sarj" className="transition hover:text-white">Şarj Noktaları</a></li>}
+              <li><a href="#hero" className="transition hover:text-white">{getMessage(language, 'home')}</a></li>
+              <li><a href="#araclar" className="transition hover:text-white">{getMessage(language, 'vehicles')}</a></li>
+              {showVehicleNews && <li><a href="#haberler" className="transition hover:text-white">{getMessage(language, 'news')}</a></li>}
+              {showChargingStations && <li><a href="#sarj" className="transition hover:text-white">{getMessage(language, 'chargingStations')}</a></li>}
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">Not</h4>
+            <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">{getMessage(language, 'footerNote')}</h4>
             <p className="text-sm leading-6 text-slate-300">
-              Site bağımsız bilgilendirme ve karşılaştırma amacıyla hazırlanmıştır. Marka ve model adları yalnızca açıklama için kullanılır.
+              {getMessage(language, 'footerDisclaimer')}
             </p>
           </div>
         </div>
 
         <div className="border-t border-slate-800">
           <div className="container mx-auto px-4 py-5 text-center text-xs text-slate-400">
-            © 2026 Elektrikli Araç Platformu. Tüm hakları saklıdır.
+            {getMessage(language, 'footerCopyright')}
           </div>
         </div>
       </footer>

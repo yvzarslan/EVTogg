@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { useLanguage } from './LanguageProvider';
+import { getMessage } from '@/lib/i18n';
 
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
+  const { language } = useLanguage();
 
   // Sayfa kaydırma miktarını kontrol et
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function ScrollToTop() {
         <button
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl transition-all duration-300 z-60] animate-bounce-subtle"
-          aria-label="Yukarı Çık"
+          aria-label={getMessage(language, "scrollToTop")}
         >
           <svg 
             className="w-6 h-6" 

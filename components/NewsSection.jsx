@@ -4,8 +4,11 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react'; 
 import { Loader2, Newspaper, Play } from 'lucide-react';
 import { getLiveNews } from '@/lib/api';
+import { useLanguage } from './LanguageProvider';
+import { getMessage } from '@/lib/i18n';
 
 export default function NewsSection({ filters }) {
+  const { language } = useLanguage();
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,17 +33,17 @@ export default function NewsSection({ filters }) {
           <div className="bg-blue-600 p-2 rounded-lg">
             <Newspaper className="text-white" size={20} />
           </div>
-          {filters.brand ? `${filters.brand} Haberleri` : "Elektrikli Araç Dünyası"}
+          {filters.brand ? `${filters.brand} ${getMessage(language, "news")}` : getMessage(language, "newsTitle")}
         </h2>
         <div className="hidden md:block text-sm text-slate-400 font-medium">
-          Canlı Veri Akışı
+          {getMessage(language, "liveData")}
         </div>
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="animate-spin text-blue-600" size={40} />
-          <p className="text-slate-400 text-sm italic">Haberler taranıyor...</p>
+          <p className="text-slate-400 text-sm italic">{getMessage(language, "loadingNews")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -81,7 +84,7 @@ export default function NewsSection({ filters }) {
               </div>
             ) : (
               <div className="bg-slate-50 rounded-[4xl] p-12 text-center border-2 border-dashed border-slate-200">
-                <p className="text-slate-400 font-medium">Seçili kriterlere uygun haber bulunamadı.</p>
+                <p className="text-slate-400 font-medium">{getMessage(language, "noNews")}</p>
               </div>
             )}
           </div>
@@ -92,7 +95,7 @@ export default function NewsSection({ filters }) {
   <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white sticky top-8">
     <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
       <Play className="text-red-500 fill-red-500" size={20} /> 
-      {filters.brand ? `${filters.brand} İncelemesi` : "Öne Çıkan Video"}
+      {filters.brand ? `${filters.brand} ${getMessage(language, "review")}` : getMessage(language, "featuredVideo")}
     </h3>
     
     <div className="space-y-6">
@@ -104,8 +107,8 @@ export default function NewsSection({ filters }) {
           width="100%"
           height="100%"
           // 'q' parametresi arama terimidir. 'elektrikli araç inceleme' ekleyerek özelleştirdik.
-          src={`https://www.youtube.com/embed?listType=search&q=${encodeURIComponent((filters.brand || '') + " elektrikli araç inceleme türkçe")}&modestbranding=1&rel=0`}
-          title="${filters.brand || 'Elektrikli Araç'} İnceleme Videosu"
+          src={`https://www.youtube.com/embed?listType=search&q=${encodeURIComponent((filters.brand || '') + " " + (language === "ru" ? "обзор электромобиля" : language === "en" ? "electric car review" : language === "zh" ? "电动汽车评测" : "elektrikli araç inceleme türkçe"))}&modestbranding=1&rel=0`}
+          title={`${filters.brand || getMessage(language, "vehicleList")} ${getMessage(language, "reviewVideo")}`}
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -116,8 +119,8 @@ export default function NewsSection({ filters }) {
       <div className="space-y-4">
         <p className="text-slate-400 text-sm leading-relaxed italic">
           {filters.brand 
-            ? `YouTube üzerindeki en alakalı ${filters.brand} inceleme videosu yukarıda gösterilmektedir.` 
-            : "Elektrikli araç dünyasından öne çıkan en güncel test sürüşü ve incelemeler."}
+            ? getMessage(language, "youtubeBrandDescription").replace("{brand}", filters.brand)
+            : getMessage(language, "youtubeDescription")}
         </p>
         
         {/* YouTube'a Yönlendirme Butonu */}
@@ -127,7 +130,7 @@ export default function NewsSection({ filters }) {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400 hover:text-blue-300 transition-colors bg-blue-950 px-4 py-2 rounded-full"
         >
-          YouTube da Daha Fazla Ara <Newspaper size={12} />
+          {getMessage(language, "youtubeMore")} <Newspaper size={12} />
         </a>
       </div>
     </div>
