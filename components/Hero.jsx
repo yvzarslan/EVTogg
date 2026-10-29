@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { showChargingStations } from '@/lib/features';
 import { useLanguage } from './LanguageProvider';
+import ScrollLink from './ScrollLink';
 import { getMessage } from '@/lib/i18n';
 
 export default function Hero() {
@@ -45,13 +46,13 @@ export default function Hero() {
           transition={{ delay: 0.28 }}
           className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
-          <a href="#araclar" className="inline-flex items-center justify-center rounded-full bg-blue-500 px-6 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(59,130,246,0.5)] transition hover:bg-blue-400">
+          <ScrollLink targetId="araclar" className="inline-flex items-center justify-center rounded-full bg-blue-500 px-6 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(59,130,246,0.5)] transition hover:bg-blue-400">
             {getMessage(language, "viewVehicles")}
-          </a>
+          </ScrollLink>
           {showChargingStations && (
-            <a href="#sarj" className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/5 px-6 py-3 text-sm font-black text-white backdrop-blur-sm transition hover:bg-white/10">
+            <ScrollLink targetId="sarj" className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/5 px-6 py-3 text-sm font-black text-white backdrop-blur-sm transition hover:bg-white/10">
               {getMessage(language, "chargingStations")}
-            </a>
+            </ScrollLink>
           )}
         </motion.div>
 

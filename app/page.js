@@ -3,6 +3,7 @@ import FilterBar from '@/components/FilterBar';
 import NewsSection from '@/components/NewsSection';
 import ChargingMap from '@/components/ChargingMap';
 import ComparisonWrapper from '@/components/ComparisonWrapper';
+import ScrollLink from '@/components/ScrollLink';
 import { scrapeEVData } from '@/lib/scraper';
 import { showChargingStations, showVehicleNews } from '@/lib/features';
 import { bodyStyleLabels, segmentLabels } from '@/lib/vehicleFilters';
@@ -145,10 +146,10 @@ export default async function HomePage({ searchParams }) {
           <div>
             <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">{getMessage(language, 'footerMenu')}</h4>
             <ul className="space-y-2 text-sm text-slate-300">
-              <li><a href="#hero" className="transition hover:text-white">{getMessage(language, 'home')}</a></li>
-              <li><a href="#araclar" className="transition hover:text-white">{getMessage(language, 'vehicles')}</a></li>
-              {showVehicleNews && <li><a href="#haberler" className="transition hover:text-white">{getMessage(language, 'news')}</a></li>}
-              {showChargingStations && <li><a href="#sarj" className="transition hover:text-white">{getMessage(language, 'chargingStations')}</a></li>}
+              <li><ScrollLink targetId="hero" className="transition hover:text-white">{getMessage(language, 'home')}</ScrollLink></li>
+              <li><ScrollLink targetId="araclar" className="transition hover:text-white">{getMessage(language, 'vehicles')}</ScrollLink></li>
+              {showVehicleNews && <li><ScrollLink targetId="haberler" className="transition hover:text-white">{getMessage(language, 'news')}</ScrollLink></li>}
+              {showChargingStations && <li><ScrollLink targetId="sarj" className="transition hover:text-white">{getMessage(language, 'chargingStations')}</ScrollLink></li>}
             </ul>
           </div>
 

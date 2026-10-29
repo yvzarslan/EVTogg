@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { showChargingStations, showVehicleNews } from '@/lib/features';
 import { useLanguage } from './LanguageProvider';
 import { getMessage } from '@/lib/i18n';
+import ScrollLink from './ScrollLink';
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,17 +33,17 @@ export default function MobileMenu() {
         <div className="absolute right-0 top-[calc(100%+0.75rem)] w-[220px] overflow-hidden rounded-2xl border border-slate-700 bg-slate-950/95 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
           <div className="flex flex-col divide-y divide-slate-800">
             {[
-              [getMessage(language, "news"), '#haberler', showVehicleNews],
-              [getMessage(language, "chargingStations"), '#sarj', showChargingStations],
-            ].map(([label, href, enabled = true]) => enabled && (
-              <a
+              [getMessage(language, "news"), 'haberler', showVehicleNews],
+              [getMessage(language, "chargingStations"), 'sarj', showChargingStations],
+            ].map(([label, targetId, enabled = true]) => enabled && (
+              <ScrollLink
                 key={label}
-                href={href}
+                targetId={targetId}
                 onClick={() => setIsOpen(false)}
                 className="px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-800 hover:text-blue-300"
               >
                 {label}
-              </a>
+              </ScrollLink>
             ))}
           </div>
         </div>
