@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react'; 
 import { Loader2, Newspaper, Play } from 'lucide-react';
 import { getLiveNews } from '@/lib/api';
@@ -57,15 +58,13 @@ export default function NewsSection({ filters }) {
                     className="group flex flex-col bg-white rounded-[4xl] border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-500"
                   >
                     <div className="relative h-48 w-full bg-slate-50">
-                      <img 
-                          src={`https://images.weserv.nl/?url=${encodeURIComponent(item.urlToImage)}&w=400&h=250&fit=cover`} 
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          onError={(e) => {
-                            // Eğer proxy de başarısız olursa yedek görsel göster
-                            e.target.src = "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=400";
-                          }}
-                        />
+                      <Image
+                        src={item.urlToImage ? `https://images.weserv.nl/?url=${encodeURIComponent(item.urlToImage)}&w=400&h=250&fit=cover` : 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=400'}
+                        alt={item.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
                     </div>
                     <div className="p-6">
                       <div className="flex items-center gap-2 mb-3">

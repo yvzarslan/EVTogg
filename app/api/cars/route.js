@@ -8,6 +8,8 @@ export async function GET(req) {
     brand: searchParams.get("brand") || "",
     range: searchParams.get("range") || "",
     accel: searchParams.get("accel") || "",
+    segment: searchParams.get("segment") || "",
+    bodyStyle: searchParams.get("bodyStyle") || "",
   };
 
   const cars = await scrapeEVData(filters);
