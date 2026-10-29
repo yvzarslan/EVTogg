@@ -24,12 +24,6 @@ export default function SiteHeader({ showVehicleNews, showChargingStations }) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <ScrollLink
-            targetId="araclar"
-            className="hidden rounded-full border border-blue-400/40 bg-blue-500/10 px-4 py-2 text-xs font-bold text-blue-200 transition hover:bg-blue-500/20 sm:inline-flex"
-          >
-            {getMessage(language, "quickSearch")}
-          </ScrollLink>
           <LanguageSwitcher />
         </div>
       </div>
