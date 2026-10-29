@@ -13,11 +13,6 @@ const ChargingStationsMap = dynamic(() => import("./ChargingStationsMap"), {
 
 export default function ChargingMap() {
   const [stations, setStations] = useState([]);
-  const [sourceCounts, setSourceCounts] = useState({
-    openStreetMap: 0,
-    openChargeMap: 0,
-  });
-  const [openChargeMapConfigured, setOpenChargeMapConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryCount, setRetryCount] = useState(0);
@@ -44,8 +39,6 @@ export default function ChargingMap() {
         }
 
         setStations(data.stations);
-        setSourceCounts(data.sourceCounts || { openStreetMap: data.stations.length, openChargeMap: 0 });
-        setOpenChargeMapConfigured(Boolean(data.openChargeMapConfigured));
       } catch (requestError) {
         if (requestError.name !== "AbortError") {
           setError(
@@ -74,9 +67,6 @@ export default function ChargingMap() {
             <Zap className="text-white" size={20} fill="white" />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-600">
-              OpenStreetMap kayıtları
-            </p>
             <h2 className="text-2xl font-black text-slate-900">Şarj Noktaları</h2>
           </div>
         </div>
@@ -114,11 +104,6 @@ export default function ChargingMap() {
         )}
       </div>
 
-      <p className="mt-4 text-center text-xs text-slate-500">
-        OpenStreetMap: {sourceCounts.openStreetMap} kayıt · Open Charge Map: {sourceCounts.openChargeMap} kayıt.
-        {!openChargeMapConfigured &&
-          " Daha geniş kapsama için sunucuda OPEN_CHARGE_MAP_API_KEY yapılandırılabilir."}
-      </p>
     </section>
   );
 }

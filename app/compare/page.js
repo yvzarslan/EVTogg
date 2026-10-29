@@ -25,5 +25,10 @@ export default async function ComparePage({ searchParams }) {
     );
   }
 
-  return <VehicleComparison selectedCars={selectedCars} />;
+  const publicSelectedCars = selectedCars.map((car) => ({
+    ...car,
+    image: `/api/vehicle-image/${encodeURIComponent(car.id)}`,
+  }));
+
+  return <VehicleComparison selectedCars={publicSelectedCars} />;
 }

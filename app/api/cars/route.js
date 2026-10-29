@@ -14,5 +14,10 @@ export async function GET(req) {
 
   const cars = await scrapeEVData(filters);
 
-  return Response.json(cars);
+  return Response.json(
+    cars.map((car) => ({
+      ...car,
+      image: `/api/vehicle-image/${encodeURIComponent(car.id)}`,
+    }))
+  );
 }

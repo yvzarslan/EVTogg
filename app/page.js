@@ -59,6 +59,10 @@ export default async function HomePage({ searchParams }) {
   const displayCars = isFiltered
     ? sortedCars.filter((car) => matchesFilters(car, filters))
     : sortedCars.slice(0, 12);
+  const publicDisplayCars = displayCars.map((car) => ({
+    ...car,
+    image: `/api/vehicle-image/${encodeURIComponent(car.id)}`,
+  }));
 
   return (
     <main className="bg-[#f8fafc] min-h-screen pb-20">
@@ -84,7 +88,7 @@ export default async function HomePage({ searchParams }) {
         </div>
 
         {displayCars.length > 0 ? (
-          <ComparisonWrapper displayCars={displayCars} />
+          <ComparisonWrapper displayCars={publicDisplayCars} />
         ) : (
           <div className="col-span-full text-center py-20 bg-white rounded-[3xl] border border-dashed border-slate-300 text-slate-400">
             {getMessage(language, 'noMatchingCars')}

@@ -133,14 +133,7 @@ export async function GET() {
       }
     }
 
-    cachedResponse = {
-      stations,
-      sourceCounts: {
-        openStreetMap: openStreetMapStations.length,
-        openChargeMap: openChargeMapStations.length,
-      },
-      openChargeMapConfigured: Boolean(openChargeMapKey),
-    };
+    cachedResponse = { stations };
     lastFetchTime = Date.now();
 
     return Response.json(cachedResponse);

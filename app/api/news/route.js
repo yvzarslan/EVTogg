@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const brand = searchParams.get('brand') || '';
-  const apiKey = process.env.NEWS_API_KEY || process.env.NEXT_PUBLIC_NEWS_API_KEY;
+  const apiKey = process.env.NEWS_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json({
