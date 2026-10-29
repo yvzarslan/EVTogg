@@ -7,7 +7,7 @@ export default function EVCard({ car, isSelected, onSelect }) {
   return (
     <div
       onClick={onSelect}
-      className={`group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border bg-white shadow-[0_30px_80px_-45px_rgba(15,23,42,0.65)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_35px_100px_-35px_rgba(59,130,246,0.5)] ${
+      className={`group relative flex h-full w-full max-w-[420px] cursor-pointer flex-col overflow-hidden rounded-[2rem] border bg-white shadow-[0_30px_80px_-45px_rgba(15,23,42,0.65)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_35px_100px_-35px_rgba(59,130,246,0.5)] ${
         isSelected ? 'border-blue-600 ring-4 ring-blue-50' : 'border-slate-200/80'
       }`}
     >
@@ -33,10 +33,10 @@ export default function EVCard({ car, isSelected, onSelect }) {
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="break-words text-xl font-extrabold leading-tight text-slate-900">
+          <div className="w-full min-w-0">
+            <h3 className="w-full text-lg font-extrabold leading-snug text-slate-900 sm:text-xl">
               <span className="block">{car.brand}</span>
-              <span className="mt-1 block font-medium text-slate-500">{car.model}</span>
+              <span className="mt-1 block max-w-full font-medium text-slate-500 [overflow-wrap:anywhere]">{car.model}</span>
             </h3>
           </div>
         </div>

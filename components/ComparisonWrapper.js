@@ -24,7 +24,10 @@ export default function ComparisonWrapper({ displayCars }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        className="grid w-full justify-items-center gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))" }}
+      >
         {displayCars.map((car) => (
           <EVCard
             key={car.id}
