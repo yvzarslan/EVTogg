@@ -1,14 +1,16 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import EVCard from "./EVCard";
 import VehicleComparison from "./VehicleComparison";
+import ScrollToTop from "./ScrollToTop";
 import { useLanguage } from "./LanguageProvider";
 import { getMessage } from "@/lib/i18n";
 
 export default function ComparisonWrapper({ displayCars }) {
   const [selectedCars, setSelectedCars] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+  const comparisonScrollRef = useRef(null);
   const { language } = useLanguage();
 
   const evcarleSelection = (car) => {
@@ -27,8 +29,11 @@ export default function ComparisonWrapper({ displayCars }) {
   return (
     <>
       {showComparison ? (
-        <div className="fixed inset-0 z-[1100] overflow-y-auto bg-slate-100">
-          <VehicleComparison selectedCars={selectedCars} onEditSelection={() => setShowComparison(false)} />
+        <div className="fixed inset-0 z-[1100] bg-slate-100">
+          <div ref={comparisonScrollRef} className="h-full overflow-y-auto">
+            <VehicleComparison selectedCars={selectedCars} onEditSelection={() => setShowComparison(false)} />
+          </div>
+          <ScrollToTop scrollContainerRef={comparisonScrollRef} />
         </div>
       ) : (
         <>

@@ -3,26 +3,25 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from './LanguageProvider';
 import { getMessage } from '@/lib/i18n';
 
-export default function ScrollToTop() {
+export default function ScrollToTop({ scrollContainerRef }) {
   const [isVisible, setIsVisible] = useState(false);
   const { language } = useLanguage();
 
-  // Sayfa kaydırma miktarını kontrol et
   useEffect(() => {
-    const evcarVisibility = () => {
-      if (window.scrollY > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+    const scrollTarget = scrollContainerRef?.current || window;
+    const updateVisibility = () => {
+      const scrollPosition = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
+      setIsVisible(scrollPosition > 300);
     };
 
-    window.addEventListener("scroll", evcarVisibility);
-    return () => window.removeEventListener("scroll", evcarVisibility);
-  }, []);
+    updateVisibility();
+    scrollTarget.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => scrollTarget.removeEventListener("scroll", updateVisibility);
+  }, [scrollContainerRef]);
 
   const scrollToTop = () => {
-    window.scrollTo({
+    const scrollTarget = scrollContainerRef?.current || window;
+    scrollTarget.scrollTo({
       top: 0,
       behavior: "smooth",
     });
@@ -32,22 +31,23 @@ export default function ScrollToTop() {
     <>
       {isVisible && (
         <button
+          type="button"
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl transition-all duration-300 z-60] animate-bounce-subtle"
+          className="fixed bottom-6 right-6 z-[60] rounded-full bg-blue-500 p-3 text-white shadow-2xl transition-all duration-300 hover:bg-blue-600"
           aria-label={getMessage(language, "scrollToTop")}
         >
-          <svg 
-            className="w-6 h-6" 
+          <svg
+            className="h-6 w-6"
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
           >
-            <path 
+            <path
               strokeLinecap="round" 
               strokeLinejoin="round" 
               strokeWidth="2" 
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-            ></path>
+              d="m5 10 7-7 7 7m-7-7v18"
+            />
           </svg>
         </button>
       )}
