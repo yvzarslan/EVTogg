@@ -1,13 +1,22 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from './LanguageProvider';
 import { getMessage } from '@/lib/i18n';
 
-export default function ScrollToTop({ scrollContainerRef = null }) {
+export default function ScrollToTop({
+  scrollContainerRef = null,
+  hideOnHome = false,
+  bottomClassName = "bottom-6",
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const { language } = useLanguage();
+  const pathname = usePathname();
+  const isHidden = hideOnHome && pathname === "/";
 
   useEffect(() => {
+    if (isHidden) return undefined;
+
     const scrollTarget = scrollContainerRef?.current || window;
     const updateVisibility = () => {
       const scrollPosition = scrollTarget === window ? window.scrollY : scrollTarget.scrollTop;
@@ -17,7 +26,7 @@ export default function ScrollToTop({ scrollContainerRef = null }) {
     updateVisibility();
     scrollTarget.addEventListener("scroll", updateVisibility, { passive: true });
     return () => scrollTarget.removeEventListener("scroll", updateVisibility);
-  }, [scrollContainerRef]);
+  }, [isHidden, scrollContainerRef]);
 
   const scrollToTop = () => {
     const scrollTarget = scrollContainerRef?.current || window;
@@ -29,11 +38,11 @@ export default function ScrollToTop({ scrollContainerRef = null }) {
 
   return (
     <>
-      {isVisible && (
+      {isVisible && !isHidden && (
         <button
           type="button"
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-[60] rounded-full bg-blue-500 p-3 text-white shadow-2xl transition-all duration-300 hover:bg-blue-600"
+          className={`fixed ${bottomClassName} right-6 z-[60] rounded-full bg-blue-500 p-3 text-white shadow-2xl transition-all duration-300 hover:bg-blue-600`}
           aria-label={getMessage(language, "scrollToTop")}
         >
           <svg

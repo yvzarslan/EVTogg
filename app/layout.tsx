@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </Suspense>
           <SiteHeader showVehicleNews={showVehicleNews} showChargingStations={showChargingStations} />
           {children}
-          <ScrollToTop />
+          <ScrollToTop hideOnHome />
         </LanguageProvider>
       </body>
     </html>
