@@ -29,6 +29,7 @@ export default function ComparisonWrapper({ allCars }) {
   const [detailData, setDetailData] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [detailError, setDetailError] = useState("");
+  const [isPhotoExpanded, setIsPhotoExpanded] = useState(false);
   const comparisonScrollRef = useRef(null);
   const detailRequestRef = useRef(0);
   const { language } = useLanguage();
@@ -50,7 +51,17 @@ export default function ComparisonWrapper({ allCars }) {
 
     if (detailCar && !showComparison) {
       const handleKeyDown = (event) => {
-        if (event.key === "Escape") setDetailCar(null);
+        if (event.key === "Escape") {
+          if (isPhotoExpanded) {
+            setIsPhotoExpanded(false);
+          } else {
+            setDetailCar(null);
+          }
+        } else if (isPhotoExpanded && event.key === "ArrowLeft") {
+          window.dispatchEvent(new CustomEvent("vehicle-photo-navigation", { detail: -1 }));
+        } else if (isPhotoExpanded && event.key === "ArrowRight") {
+          window.dispatchEvent(new CustomEvent("vehicle-photo-navigation", { detail: 1 }));
+        }
       };
 
       document.addEventListener("keydown", handleKeyDown);
@@ -65,7 +76,7 @@ export default function ComparisonWrapper({ allCars }) {
       root.style.overflow = previousRootOverflow;
       body.style.overflow = previousBodyOverflow;
     };
-  }, [detailCar, showComparison]);
+  }, [detailCar, isPhotoExpanded, showComparison]);
 
   const evcarleSelection = (car) => {
     setSelectedCars((prev) => {
@@ -82,6 +93,7 @@ export default function ComparisonWrapper({ allCars }) {
 
   const showVehicleDetails = async (car) => {
     const requestId = ++detailRequestRef.current;
+    setIsPhotoExpanded(false);
     setDetailCar(car);
     setDetailData(null);
     setDetailError("");
@@ -107,6 +119,7 @@ export default function ComparisonWrapper({ allCars }) {
 
   const closeVehicleDetails = () => {
     detailRequestRef.current += 1;
+    setIsPhotoExpanded(false);
     setDetailCar(null);
     setDetailData(null);
     setDetailError("");
@@ -124,7 +137,13 @@ export default function ComparisonWrapper({ allCars }) {
             if (event.target === event.currentTarget) closeVehicleDetails();
           }}
           onKeyDown={(event) => {
-            if (event.key === "Escape") closeVehicleDetails();
+            if (event.key === "Escape") {
+              if (isPhotoExpanded) {
+                setIsPhotoExpanded(false);
+              } else {
+                closeVehicleDetails();
+              }
+            }
           }}
         >
           <div className="relative mx-auto min-h-full max-w-7xl overflow-hidden bg-slate-50 shadow-2xl sm:rounded-[2rem]">
@@ -151,6 +170,8 @@ export default function ComparisonWrapper({ allCars }) {
                 car={detailData.car}
                 images={detailData.images}
                 sourceAvailable={detailData.sourceAvailable}
+                isPhotoExpanded={isPhotoExpanded}
+                onPhotoExpandedChange={setIsPhotoExpanded}
                 onClose={closeVehicleDetails}
               />
             )}

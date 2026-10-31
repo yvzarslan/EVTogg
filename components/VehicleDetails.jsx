@@ -1,16 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { getMessage, getSpecificationLabel, getVehicleValue } from "@/lib/i18n";
 import { vehicleSpecifications } from "@/lib/vehicleSpecifications";
 import { vehicleSpecificationIcons } from "@/lib/vehicleSpecificationIcons";
 import { useLanguage } from "./LanguageProvider";
 
-export default function VehicleDetails({ car, images, sourceAvailable, onClose }) {
+export default function VehicleDetails({
+  car,
+  images,
+  sourceAvailable,
+  isPhotoExpanded,
+  onPhotoExpandedChange,
+  onClose,
+}) {
   const { language } = useLanguage();
   const gallery = images.length > 0 ? images : car.image ? [car.image] : [];
   const [activePhoto, setActivePhoto] = useState(0);
+  const fullscreenTouchStartX = useRef(null);
+  const photoButtonRef = useRef(null);
+  const fullscreenCloseButtonRef = useRef(null);
+  const wasPhotoExpandedRef = useRef(false);
   const statistics = [
     { key: "battery", label: "usableBattery", value: car.battery, Icon: vehicleSpecificationIcons.battery },
     { key: "range", label: "realRange", value: car.range, Icon: vehicleSpecificationIcons.range },
@@ -19,6 +31,25 @@ export default function VehicleDetails({ car, images, sourceAvailable, onClose }
   const specifications = vehicleSpecifications.filter(
     ({ key }) => !["battery", "range", "efficiency"].includes(key)
   );
+  const changePhoto = useCallback((direction) => {
+    setActivePhoto((current) => (current + direction + gallery.length) % gallery.length);
+  }, [gallery.length]);
+
+  useEffect(() => {
+    if (isPhotoExpanded) {
+      fullscreenCloseButtonRef.current?.focus();
+      const handlePhotoNavigation = (event) => {
+        if (event.detail === -1 || event.detail === 1) changePhoto(event.detail);
+      };
+      window.addEventListener("vehicle-photo-navigation", handlePhotoNavigation);
+      return () => window.removeEventListener("vehicle-photo-navigation", handlePhotoNavigation);
+    } else if (wasPhotoExpandedRef.current) {
+      photoButtonRef.current?.focus();
+    }
+
+    wasPhotoExpandedRef.current = isPhotoExpanded;
+    return undefined;
+  }, [changePhoto, isPhotoExpanded]);
 
   return (
     <main className="min-h-screen bg-slate-50 pb-20">
@@ -36,6 +67,13 @@ export default function VehicleDetails({ car, images, sourceAvailable, onClose }
           <div className="min-w-0">
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-100 via-white to-blue-50">
               {gallery.length > 0 ? (
+                <button
+                  type="button"
+                  ref={photoButtonRef}
+                  onClick={() => onPhotoExpandedChange(true)}
+                  aria-label={getMessage(language, "viewPhotoFullscreen")}
+                  className="absolute inset-0 block h-full w-full cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-blue-600"
+                >
                 <Image
                   key={gallery[activePhoto]}
                   src={gallery[activePhoto]}
@@ -45,6 +83,7 @@ export default function VehicleDetails({ car, images, sourceAvailable, onClose }
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   className="object-contain p-4"
                 />
+                </button>
               ) : (
                 <div className="flex h-full items-center justify-center text-sm font-semibold text-slate-400">
                   {getMessage(language, "unknown")}
@@ -120,6 +159,71 @@ export default function VehicleDetails({ car, images, sourceAvailable, onClose }
             )}
           </div>
         </section>
+
+        {isPhotoExpanded && gallery[activePhoto] && (
+          <div
+            data-photo-lightbox
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${getMessage(language, "photo")} ${activePhoto + 1}`}
+            className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-950/95 p-4 sm:p-8"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) onPhotoExpandedChange(false);
+            }}
+            onTouchStart={(event) => {
+              fullscreenTouchStartX.current = event.touches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(event) => {
+              if (fullscreenTouchStartX.current === null) return;
+              const distance = event.changedTouches[0].clientX - fullscreenTouchStartX.current;
+              fullscreenTouchStartX.current = null;
+              if (Math.abs(distance) > 50) changePhoto(distance < 0 ? 1 : -1);
+            }}
+          >
+            <button
+              type="button"
+              ref={fullscreenCloseButtonRef}
+              onClick={() => onPhotoExpandedChange(false)}
+              aria-label={getMessage(language, "close")}
+              className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-6 sm:top-6"
+            >
+              <X aria-hidden="true" size={26} />
+            </button>
+            {gallery.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => changePhoto(-1)}
+                  aria-label={getMessage(language, "previousPhoto")}
+                  className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:left-6 sm:h-14 sm:w-14"
+                >
+                  <ChevronLeft aria-hidden="true" size={30} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changePhoto(1)}
+                  aria-label={getMessage(language, "nextPhoto")}
+                  className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-6 sm:h-14 sm:w-14"
+                >
+                  <ChevronRight aria-hidden="true" size={30} />
+                </button>
+                <p className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-sm font-semibold text-white">
+                  {activePhoto + 1} / {gallery.length}
+                </p>
+              </>
+            )}
+            <div className="relative h-full w-full">
+              <Image
+                key={`fullscreen-${gallery[activePhoto]}`}
+                src={gallery[activePhoto]}
+                alt={`${car.brand} ${car.model} — ${getMessage(language, "photo")} ${activePhoto + 1}`}
+                fill
+                sizes="100vw"
+                className="object-contain"
+              />
+            </div>
+          </div>
+        )}
 
         <section className="mt-10">
           <div className="mb-5 flex items-center gap-3">
