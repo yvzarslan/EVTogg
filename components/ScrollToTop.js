@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from './LanguageProvider';
 import { getMessage } from '@/lib/i18n';
 
-export default function ScrollToTop({ scrollContainerRef }) {
+export default function ScrollToTop({ scrollContainerRef = null }) {
   const [isVisible, setIsVisible] = useState(false);
   const { language } = useLanguage();
 
