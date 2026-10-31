@@ -9,6 +9,8 @@ import {
   useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useLanguage } from "./LanguageProvider";
+import { getMessage } from "@/lib/i18n";
 
 function FitStations({ stations }) {
   const map = useMap();
@@ -26,6 +28,8 @@ function FitStations({ stations }) {
 }
 
 export default function ChargingStationsMap({ stations }) {
+  const { language } = useLanguage();
+
   return (
     <MapContainer
       center={[41.0082, 28.9784]}
@@ -52,10 +56,10 @@ export default function ChargingStationsMap({ stations }) {
           <Popup>
             <strong>{station.name}</strong>
             {station.operator && station.operator !== station.name && (
-              <div>İşletmeci: {station.operator}</div>
+              <div>{getMessage(language, "operatorLabel")}: {station.operator}</div>
             )}
             {station.brand && station.brand !== station.name && (
-              <div>Marka: {station.brand}</div>
+              <div>{getMessage(language, "brand")}: {station.brand}</div>
             )}
           </Popup>
         </CircleMarker>

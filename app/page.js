@@ -1,5 +1,6 @@
 import Hero from '@/components/Hero';
 import FilterBar from '@/components/FilterBar';
+import { FilterProvider } from '@/components/FilterProvider';
 import NewsSection from '@/components/NewsSection';
 import ChargingMap from '@/components/ChargingMap';
 import ComparisonWrapper from '@/components/ComparisonWrapper';
@@ -11,20 +12,6 @@ import { cookies } from 'next/headers';
 import { defaultLanguage, getMessage, normalizeLanguage } from '@/lib/i18n';
 
 export const revalidate = 86400;
-
-const matchesFilters = (car, filters) => {
-  const brand = filters.brand?.toLowerCase();
-  const range = Number(filters.range);
-  const accel = Number(filters.accel);
-
-  if (brand && car.brand.toLowerCase() !== brand) return false;
-  if (filters.segment && car.segmentCode !== filters.segment) return false;
-  if (filters.bodyStyle && car.bodyStyleCode !== filters.bodyStyle) return false;
-  if (range && Number.parseFloat((car.range || '').replace(/[^\d.]/g, '')) < range) return false;
-  if (accel && Number.parseFloat((car.accel || '').replace(/[^\d.]/g, '')) > accel) return false;
-
-  return true;
-};
 
 export default async function HomePage({ searchParams }) {
   const params = await searchParams;
@@ -38,9 +25,6 @@ export default async function HomePage({ searchParams }) {
     bodyStyle: params.bodyStyle || '',
   };
 
-  const isFiltered = Boolean(
-    filters.brand || filters.range || filters.accel || filters.segment || filters.bodyStyle
-  );
   const allCars = await scrapeEVData({});
   const sortedCars = [...allCars].sort((a, b) => {
     const brandCompare = a.brand.localeCompare(b.brand, 'tr');
@@ -56,16 +40,14 @@ export default async function HomePage({ searchParams }) {
   const uniqueBodyStyles = [...new Set(sortedCars.map((car) => car.bodyStyleCode).filter(Boolean))]
     .sort((a, b) => bodyStyleLabels[a].localeCompare(bodyStyleLabels[b], 'tr'));
 
-  const displayCars = isFiltered
-    ? sortedCars.filter((car) => matchesFilters(car, filters))
-    : sortedCars.slice(0, 12);
-  const publicDisplayCars = displayCars.map((car) => ({
+  const publicDisplayCars = sortedCars.map((car) => ({
     ...car,
     image: `/api/vehicle-image/${encodeURIComponent(car.id)}`,
   }));
 
   return (
-    <main className="bg-[#f8fafc] min-h-screen pb-20">
+    <FilterProvider initialFilters={filters}>
+      <main className="bg-[#f8fafc] min-h-screen pb-20">
       <section id="hero">
         <Hero />
       </section>
@@ -75,7 +57,6 @@ export default async function HomePage({ searchParams }) {
           initialBrands={uniqueBrands}
           initialSegments={uniqueSegments}
           initialBodyStyles={uniqueBodyStyles}
-          currentFilters={filters}
         />
       </section>
 
@@ -87,18 +68,12 @@ export default async function HomePage({ searchParams }) {
           </h2>
         </div>
 
-        {displayCars.length > 0 ? (
-          <ComparisonWrapper displayCars={publicDisplayCars} />
-        ) : (
-          <div className="col-span-full text-center py-20 bg-white rounded-[3xl] border border-dashed border-slate-300 text-slate-400">
-            {getMessage(language, 'noMatchingCars')}
-          </div>
-        )}
+        <ComparisonWrapper allCars={publicDisplayCars} />
       </section>
 
       {showVehicleNews && (
         <section id="haberler">
-          <NewsSection filters={filters} />
+          <NewsSection />
         </section>
       )}
 
@@ -171,6 +146,7 @@ export default async function HomePage({ searchParams }) {
           </div>
         </div>
       </footer>
-    </main>
+      </main>
+    </FilterProvider>
   );
 }

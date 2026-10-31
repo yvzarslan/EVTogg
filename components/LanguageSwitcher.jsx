@@ -8,6 +8,7 @@ const languageNames = {
   en: "EN",
   ru: "Русский",
   zh: "中文",
+  de: "Deutsch",
 };
 
 export default function LanguageSwitcher() {

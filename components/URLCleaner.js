@@ -3,15 +3,6 @@
 import { useEffect } from 'react';
 import { useSearchParams, usePathname } from 'next/navigation';
 
-const APP_QUERY_PARAMS = new Set([
-  'brand',
-  'range',
-  'accel',
-  'segment',
-  'bodyStyle',
-  'ids',
-]);
-
 export default function URLCleaner() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -20,12 +11,12 @@ export default function URLCleaner() {
     const currentQuery = searchParams.toString();
     if (!currentQuery) return;
 
-    const appParams = new URLSearchParams();
-    for (const [key, value] of searchParams.entries()) {
-      if (APP_QUERY_PARAMS.has(key)) appParams.append(key, value);
+    const preservedParams = new URLSearchParams();
+    if (pathname === "/compare") {
+      for (const id of searchParams.getAll("ids")) preservedParams.append("ids", id);
     }
 
-    const preservedQuery = appParams.toString();
+    const preservedQuery = preservedParams.toString();
     if (preservedQuery === currentQuery) return;
 
     const query = preservedQuery ? `?${preservedQuery}` : '';

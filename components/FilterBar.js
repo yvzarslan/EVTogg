@@ -1,44 +1,16 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 import { bodyStyleLabels, segmentLabels } from "@/lib/vehicleFilters";
 import { useLanguage } from "./LanguageProvider";
+import { useFilters } from "./FilterProvider";
 import { getMessage, getSegmentTranslation, getBodyStyleTranslation } from "@/lib/i18n";
 
 export default function FilterBar({
   initialBrands = [],
   initialSegments = [],
   initialBodyStyles = [],
-  currentFilters,
 }) {
-  const router = useRouter();
   const { language } = useLanguage();
-  //const searchParams = useSearchParams();
-
-  const [filters, setFilters] = useState({
-    brand: currentFilters.brand || "",
-    range: currentFilters.range || 660,
-    accel: currentFilters.accel || 10,
-    segment: currentFilters.segment || "",
-    bodyStyle: currentFilters.bodyStyle || "",
-  });
-
-  // Filtreler değiştiğinde URL'yi güncelle (Debounce ile)
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const params = new URLSearchParams();
-      if (filters.brand) params.set("brand", filters.brand);
-      if (filters.segment) params.set("segment", filters.segment);
-      if (filters.bodyStyle) params.set("bodyStyle", filters.bodyStyle);
-      if (filters.range) params.set("range", filters.range);
-      if (filters.accel) params.set("accel", filters.accel);
-
-      // URL'yi güncelle (Sayfayı yenilemeden veriyi çeker)
-      router.push(`?${params.toString()}`, { scroll: false });
-    }, 400);
-
-    return () => clearTimeout(handler);
-  }, [filters, router]);
+  const { filters, updateFilters } = useFilters();
 
   return (
     <div className="rounded-[2rem] border border-slate-200 bg-white/85 p-4 shadow-[0_24px_90px_-45px_rgba(37,99,235,0.7)] backdrop-blur-sm sm:p-6">
@@ -50,7 +22,7 @@ export default function FilterBar({
           <select
             id="brand-filter"
             value={filters.brand}
-            onChange={(e) => setFilters({...filters, brand: e.target.value})}
+            onChange={(e) => updateFilters((current) => ({...current, brand: e.target.value}))}
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           >
             <option value="">{getMessage(language, "allBrands")}</option>
@@ -65,7 +37,7 @@ export default function FilterBar({
           <select
             id="segment-filter"
             value={filters.segment}
-            onChange={(e) => setFilters({ ...filters, segment: e.target.value })}
+            onChange={(e) => updateFilters((current) => ({ ...current, segment: e.target.value }))}
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           >
             <option value="">{getMessage(language, "allSegments")}</option>
@@ -80,7 +52,7 @@ export default function FilterBar({
           <select
             id="body-style-filter"
             value={filters.bodyStyle}
-            onChange={(e) => setFilters({ ...filters, bodyStyle: e.target.value })}
+            onChange={(e) => updateFilters((current) => ({ ...current, bodyStyle: e.target.value }))}
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           >
             <option value="">{getMessage(language, "allBodyStyles")}</option>
@@ -100,7 +72,7 @@ export default function FilterBar({
             min="100"
             max="1000"
             value={filters.range}
-            onChange={(e) => setFilters({...filters, range: e.target.value})}
+            onChange={(e) => updateFilters((current) => ({...current, range: e.target.value}))}
             className="w-full accent-blue-600"
           />
         </div>
@@ -116,7 +88,7 @@ export default function FilterBar({
             max="15"
             step="0.1"
             value={filters.accel}
-            onChange={(e) => setFilters({...filters, accel: e.target.value})}
+            onChange={(e) => updateFilters((current) => ({...current, accel: e.target.value}))}
             className="w-full accent-blue-600"
           />
         </div>

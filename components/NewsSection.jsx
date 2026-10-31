@@ -5,10 +5,21 @@ import { useEffect, useState } from 'react';
 import { Loader2, Newspaper, Play } from 'lucide-react';
 import { getLiveNews } from '@/lib/api';
 import { useLanguage } from './LanguageProvider';
+import { useFilters } from './FilterProvider';
 import { getMessage } from '@/lib/i18n';
 
-export default function NewsSection({ filters }) {
+const reviewSearchTerms = {
+  tr: "elektrikli araç inceleme",
+  en: "electric car review",
+  ru: "обзор электромобиля",
+  zh: "电动汽车评测",
+  de: "Elektroauto Test",
+};
+
+export default function NewsSection() {
   const { language } = useLanguage();
+  const { filters } = useFilters();
+  const reviewSearch = `${filters.brand || ""} ${reviewSearchTerms[language]}`;
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -107,7 +118,7 @@ export default function NewsSection({ filters }) {
           width="100%"
           height="100%"
           // 'q' parametresi arama terimidir. 'elektrikli araç inceleme' ekleyerek özelleştirdik.
-          src={`https://www.youtube.com/embed?listType=search&q=${encodeURIComponent((filters.brand || '') + " " + (language === "ru" ? "обзор электромобиля" : language === "en" ? "electric car review" : language === "zh" ? "电动汽车评测" : "elektrikli araç inceleme türkçe"))}&modestbranding=1&rel=0`}
+          src={`https://www.youtube.com/embed?listType=search&q=${encodeURIComponent(reviewSearch)}&modestbranding=1&rel=0`}
           title={`${filters.brand || getMessage(language, "vehicleList")} ${getMessage(language, "reviewVideo")}`}
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -125,7 +136,7 @@ export default function NewsSection({ filters }) {
         
         {/* YouTube'a Yönlendirme Butonu */}
         <a 
-          href={`https://www.youtube.com/results?search_query=${encodeURIComponent((filters.brand || '') + " elektrikli araç inceleme")}&sp=CAI%253D`} // sp=CAI%253D güncele göre sıralar
+          href={`https://www.youtube.com/results?search_query=${encodeURIComponent(reviewSearch)}&sp=CAI%253D`} // sp=CAI%253D güncele göre sıralar
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400 hover:text-blue-300 transition-colors bg-blue-950 px-4 py-2 rounded-full"

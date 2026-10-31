@@ -6,9 +6,23 @@ import VehicleComparison from "./VehicleComparison";
 import VehicleDetails from "./VehicleDetails";
 import ScrollToTop from "./ScrollToTop";
 import { useLanguage } from "./LanguageProvider";
+import { useFilters } from "./FilterProvider";
 import { getMessage } from "@/lib/i18n";
 
-export default function ComparisonWrapper({ displayCars }) {
+function matchesFilters(car, filters) {
+  const brand = filters.brand?.toLowerCase();
+  const range = Number(filters.range);
+  const accel = Number(filters.accel);
+
+  if (brand && car.brand.toLowerCase() !== brand) return false;
+  if (filters.segment && car.segmentCode !== filters.segment) return false;
+  if (filters.bodyStyle && car.bodyStyleCode !== filters.bodyStyle) return false;
+  if (range && Number.parseFloat((car.range || "").replace(/[^\d.]/g, "")) < range) return false;
+  if (accel && Number.parseFloat((car.accel || "").replace(/[^\d.]/g, "")) > accel) return false;
+  return true;
+}
+
+export default function ComparisonWrapper({ allCars }) {
   const [selectedCars, setSelectedCars] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
   const [detailCar, setDetailCar] = useState(null);
@@ -18,9 +32,13 @@ export default function ComparisonWrapper({ displayCars }) {
   const comparisonScrollRef = useRef(null);
   const detailRequestRef = useRef(0);
   const { language } = useLanguage();
+  const { filters, hasActiveFilters } = useFilters();
+  const displayCars = hasActiveFilters
+    ? allCars.filter((car) => matchesFilters(car, filters))
+    : allCars.slice(0, 12);
 
   useEffect(() => {
-    if (!detailCar || showComparison) return undefined;
+    if (!detailCar && !showComparison) return undefined;
 
     const root = document.documentElement;
     const body = document.body;
@@ -30,13 +48,20 @@ export default function ComparisonWrapper({ displayCars }) {
     root.style.overflow = "hidden";
     body.style.overflow = "hidden";
 
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") setDetailCar(null);
-    };
+    if (detailCar && !showComparison) {
+      const handleKeyDown = (event) => {
+        if (event.key === "Escape") setDetailCar(null);
+      };
 
-    document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+        root.style.overflow = previousRootOverflow;
+        body.style.overflow = previousBodyOverflow;
+      };
+    }
+
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
       root.style.overflow = previousRootOverflow;
       body.style.overflow = previousBodyOverflow;
     };
@@ -144,20 +169,26 @@ export default function ComparisonWrapper({ displayCars }) {
           <ScrollToTop
             bottomClassName={selectedCars.length > 0 ? "bottom-56 md:bottom-32" : "bottom-6"}
           />
-          <div
-            className="grid w-full justify-items-center gap-6"
-            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))" }}
-          >
-            {displayCars.map((car) => (
-              <EVCard
-                key={car.id}
-                car={car}
-                isSelected={selectedCars.some((c) => c.id === car.id)}
-                onSelect={() => evcarleSelection(car)}
-                onDetails={() => showVehicleDetails(car)}
-              />
-            ))}
-          </div>
+          {displayCars.length > 0 ? (
+            <div
+              className="grid w-full justify-items-center gap-6"
+              style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))" }}
+            >
+              {displayCars.map((car) => (
+                <EVCard
+                  key={car.id}
+                  car={car}
+                  isSelected={selectedCars.some((c) => c.id === car.id)}
+                  onSelect={() => evcarleSelection(car)}
+                  onDetails={() => showVehicleDetails(car)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white py-20 text-center text-slate-400">
+              {getMessage(language, "noMatchingCars")}
+            </div>
+          )}
 
           {selectedCars.length > 0 && (
             <div className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-200 bg-white/90 p-4 shadow-[0_-15px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl md:p-5">
