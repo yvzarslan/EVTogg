@@ -28,6 +28,7 @@ const monetaryInputs = [
 const currencyByLanguage = {
   tr: "TRY",
   en: "USD",
+  fr: "EUR",
   de: "EUR",
   ru: "RUB",
   zh: "CNY",

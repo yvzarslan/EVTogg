@@ -1,9 +1,14 @@
 import CostGuide from "@/components/CostGuide";
+import { cookies } from "next/headers";
+import { defaultLanguage, getMessage, normalizeLanguage } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Elektrikli Araç Maliyet Hesaplama | EV Platform",
-  description: "Türkiye'deki elektrik, şarj ve yakıt fiyatlarınızı girerek elektrikli araçların yıllık kullanım maliyetini karşılaştırın.",
-};
+export async function generateMetadata() {
+  const language = normalizeLanguage((await cookies()).get("ev-platform-language")?.value || defaultLanguage);
+  return {
+    title: `${getMessage(language, "costGuideTitle")} | EV Platform`,
+    description: getMessage(language, "costGuideIntro"),
+  };
+}
 
 export default function CostCalculationPage() {
   return <CostGuide />;

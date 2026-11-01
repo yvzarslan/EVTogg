@@ -6,6 +6,7 @@ import { getMessage, supportedLanguages } from "@/lib/i18n";
 const languageNames = {
   tr: "Türkçe",
   en: "EN",
+  fr: "Français",
   ru: "Русский",
   zh: "中文",
   de: "Deutsch",
