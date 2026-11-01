@@ -191,15 +191,10 @@ export default function VehicleDetails({
 
             {car.longDistanceSuitability?.values?.length > 0 && (
               <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <div className="mb-5">
                   <h2 className="text-xl font-black text-slate-900">
                     {getMessage(language, "longDistanceSuitability")}
                   </h2>
-                  <p className="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-black text-blue-700">
-                    {car.longDistanceSuitability.rating}
-                    {" "}
-                    {getMessage(language, "ratingOutOfFive")}
-                  </p>
                 </div>
                 <dl className="grid gap-2 sm:grid-cols-2">
                   {car.longDistanceSuitability.values.map(({ label, value }, index) => (
