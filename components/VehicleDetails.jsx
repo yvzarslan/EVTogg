@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { getMessage, getSpecificationLabel, getVehicleValue } from "@/lib/i18n";
+import { getMessage, getSpecificationLabel, getVehicleDetailRowLabel, getVehicleValue } from "@/lib/i18n";
 import { vehicleSpecifications } from "@/lib/vehicleSpecifications";
 import { vehicleSpecificationIcons } from "@/lib/vehicleSpecificationIcons";
 import { useLanguage } from "./LanguageProvider";
@@ -159,6 +159,62 @@ export default function VehicleDetails({
             )}
           </div>
         </section>
+
+        {(car.realRangeEstimation || car.longDistanceSuitability) && (
+          <section className="mt-8 grid gap-6 lg:grid-cols-2">
+            {car.realRangeEstimation?.values?.length > 0 && (
+              <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <div className="mb-5">
+                  <h2 className="text-xl font-black text-slate-900">
+                    {getMessage(language, "realRangeEstimation")}
+                  </h2>
+                  <p className="mt-2 text-sm font-bold text-blue-700">
+                    {new Intl.NumberFormat(language).format(car.realRangeEstimation.min)}
+                    {"–"}
+                    {new Intl.NumberFormat(language).format(car.realRangeEstimation.max)}
+                    {" "}
+                    {car.realRangeEstimation.unit}
+                  </p>
+                </div>
+                <dl className="grid gap-2 sm:grid-cols-2">
+                  {car.realRangeEstimation.values.map(({ label, value }, index) => (
+                    <div key={`${label}-${index}`} className="rounded-xl bg-slate-50 p-3">
+                      <dt className="text-xs font-semibold text-slate-500">
+                        {getVehicleDetailRowLabel(language, label, value)}
+                      </dt>
+                      <dd className="mt-1 text-base font-black text-slate-900">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            )}
+
+            {car.longDistanceSuitability?.values?.length > 0 && (
+              <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-xl font-black text-slate-900">
+                    {getMessage(language, "longDistanceSuitability")}
+                  </h2>
+                  <p className="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-black text-blue-700">
+                    {car.longDistanceSuitability.rating}
+                    {" "}
+                    {getMessage(language, "ratingOutOfFive")}
+                  </p>
+                </div>
+                <dl className="grid gap-2 sm:grid-cols-2">
+                  {car.longDistanceSuitability.values.map(({ label, value }, index) => (
+                    <div key={`${label}-${index}`} className="rounded-xl bg-slate-50 p-3">
+                      <dt className="text-xs font-semibold text-slate-500">
+                        {getVehicleDetailRowLabel(language, label, value)}
+                      </dt>
+                      <dd className="mt-1 text-base font-black text-slate-900">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            )}
+          </section>
+        )}
 
         {isPhotoExpanded && gallery[activePhoto] && (
           <div

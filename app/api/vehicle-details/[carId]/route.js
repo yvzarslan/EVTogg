@@ -23,6 +23,8 @@ export async function GET(_request, { params }) {
         battery: details.battery,
         range: details.range,
         efficiency: details.efficiency,
+        realRangeEstimation: details.realRangeEstimation,
+        longDistanceSuitability: details.longDistanceSuitability,
       },
       images: details.images.map((_, index) => `${imageBaseUrl}/${index}`),
       sourceAvailable: details.sourceAvailable,
