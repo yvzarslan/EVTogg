@@ -1,5 +1,6 @@
 "use client";
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { showChargingStations } from '@/lib/features';
 import { useLanguage } from './LanguageProvider';
@@ -54,6 +55,9 @@ export default function Hero() {
               {getMessage(language, "chargingStations")}
             </ScrollLink>
           )}
+          <Link href="/maliyet-hesaplama" className="inline-flex items-center justify-center rounded-full border border-cyan-200/50 bg-cyan-300/10 px-6 py-3 text-sm font-black text-cyan-100 backdrop-blur-sm transition hover:bg-cyan-300/20">
+            {getMessage(language, "costGuideNav")}
+          </Link>
         </motion.div>
 
         <motion.div

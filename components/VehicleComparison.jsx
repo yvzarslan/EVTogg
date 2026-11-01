@@ -126,6 +126,7 @@ export default function VehicleComparison({ selectedCars, onEditSelection }) {
                   const numericValues = selectedCars
                     .map((car) => getNumericValue(car[specification.key]))
                     .filter((value) => value !== null);
+                  const hasTiedBestValue = numericValues.filter((value) => value === bestValue).length > 1;
                   const maxValue = numericValues.length > 0 ? Math.max(...numericValues) : 0;
                   const minValue = numericValues.length > 0 ? Math.min(...numericValues) : 0;
 
@@ -136,6 +137,7 @@ export default function VehicleComparison({ selectedCars, onEditSelection }) {
                         const rawValue = getVehicleValue(language, car, specification.key);
                         const numericValue = getNumericValue(car[specification.key]);
                         const isBest = numericValue !== null && numericValue === bestValue;
+                        const isSimilar = isBest && hasTiedBestValue;
                         const barWidth = numericValue === null
                           ? 0
                           : specification.direction === "min"
@@ -168,8 +170,8 @@ export default function VehicleComparison({ selectedCars, onEditSelection }) {
                               </div>
                             )}
                             {isBest && (
-                              <span className="mt-1 block text-[10px] font-black uppercase tracking-wider text-blue-600">
-                                {getMessage(language, "best")}
+                              <span className={`mt-1 block text-[10px] font-black uppercase tracking-wider ${isSimilar ? "text-amber-700" : "text-blue-600"}`}>
+                                {getMessage(language, isSimilar ? "similar" : "best")}
                               </span>
                             )}
                           </td>

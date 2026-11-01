@@ -5,6 +5,7 @@ import NewsSection from '@/components/NewsSection';
 import ChargingMap from '@/components/ChargingMap';
 import ComparisonWrapper from '@/components/ComparisonWrapper';
 import ScrollLink from '@/components/ScrollLink';
+import Link from 'next/link';
 import { scrapeEVData } from '@/lib/scraper';
 import { showChargingStations, showVehicleNews } from '@/lib/features';
 import { bodyStyleLabels, segmentLabels } from '@/lib/vehicleFilters';
@@ -84,7 +85,7 @@ export default async function HomePage({ searchParams }) {
       )}
 
       <section className="container mx-auto mt-20 px-4">
-        <div className="grid gap-5 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-[0_30px_80px_-45px_rgba(37,99,235,0.75)] backdrop-blur-sm md:grid-cols-3">
+        <div className="grid gap-5 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-[0_30px_80px_-45px_rgba(37,99,235,0.75)] backdrop-blur-sm sm:grid-cols-2 xl:grid-cols-4">
           {[
             {
               title: getMessage(language, 'featureComparison'),
@@ -98,11 +99,24 @@ export default async function HomePage({ searchParams }) {
               title: getMessage(language, 'featureUpdates'),
               text: getMessage(language, 'featureUpdatesDescription'),
             },
+            {
+              title: getMessage(language, 'costGuideNav'),
+              text: getMessage(language, 'featureCostDescription'),
+              href: '/maliyet-hesaplama',
+            },
           ].map((item) => (
-            <div key={item.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div
+              key={item.title}
+              className={`rounded-2xl border border-slate-200 bg-slate-50 p-5 ${item.href ? "transition hover:border-blue-300 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-500" : ""}`}
+            >
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-xl text-blue-600">✓</div>
               <h3 className="mb-2 text-xl font-extrabold text-slate-900">{item.title}</h3>
               <p className="text-sm leading-6 text-slate-600">{item.text}</p>
+              {item.href && (
+                <Link href={item.href} className="mt-4 inline-flex text-sm font-black text-blue-700 hover:text-blue-900">
+                  {getMessage(language, 'costGuideNav')} →
+                </Link>
+              )}
             </div>
           ))}
         </div>
