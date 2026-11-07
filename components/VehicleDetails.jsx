@@ -111,6 +111,7 @@ export default function VehicleDetails({
                       src={image}
                       alt=""
                       fill
+                      loading="lazy"
                       sizes="112px"
                       className="object-cover"
                     />
@@ -269,6 +270,7 @@ export default function VehicleDetails({
                 src={gallery[activePhoto]}
                 alt={`${car.brand} ${car.model} — ${getMessage(language, "photo")} ${activePhoto + 1}`}
                 fill
+                loading="eager"
                 sizes="100vw"
                 className="object-contain"
               />

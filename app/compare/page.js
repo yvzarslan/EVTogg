@@ -1,12 +1,12 @@
 import { scrapeEVData } from "@/lib/scraper";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { defaultLanguage, getMessage, normalizeLanguage } from "@/lib/i18n";
+import { getMessage } from "@/lib/i18n";
+import { getRequestLanguage } from "@/lib/requestLanguage";
 import VehicleComparison from "@/components/VehicleComparison";
 
 export default async function ComparePage({ searchParams }) {
   const params = await searchParams;
-  const language = normalizeLanguage((await cookies()).get("ev-platform-language")?.value || defaultLanguage);
+  const language = await getRequestLanguage();
   const ids = params.ids?.split(",") || [];
 
   const allCars = await scrapeEVData({});

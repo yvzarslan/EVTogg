@@ -95,7 +95,11 @@ export default function ComparisonWrapper({ allCars }) {
     const requestId = ++detailRequestRef.current;
     setIsPhotoExpanded(false);
     setDetailCar(car);
-    setDetailData(null);
+    setDetailData({
+      car,
+      images: car.image ? [car.image] : [],
+      sourceAvailable: true,
+    });
     setDetailError("");
     setIsLoadingDetails(true);
 

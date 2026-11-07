@@ -9,14 +9,14 @@ import Link from 'next/link';
 import { scrapeEVData } from '@/lib/scraper';
 import { showChargingStations, showVehicleNews } from '@/lib/features';
 import { bodyStyleLabels, segmentLabels } from '@/lib/vehicleFilters';
-import { cookies } from 'next/headers';
-import { defaultLanguage, getMessage, normalizeLanguage } from '@/lib/i18n';
+import { getMessage } from '@/lib/i18n';
+import { getRequestLanguage } from '@/lib/requestLanguage';
 
 export const revalidate = 86400;
 
 export default async function HomePage({ searchParams }) {
   const params = await searchParams;
-  const language = normalizeLanguage((await cookies()).get('ev-platform-language')?.value || defaultLanguage);
+  const language = await getRequestLanguage();
 
   const filters = {
     brand: params.brand || '',

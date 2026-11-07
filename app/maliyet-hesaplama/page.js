@@ -1,9 +1,9 @@
 import CostGuide from "@/components/CostGuide";
-import { cookies } from "next/headers";
-import { defaultLanguage, getMessage, normalizeLanguage } from "@/lib/i18n";
+import { getMessage } from "@/lib/i18n";
+import { getRequestLanguage } from "@/lib/requestLanguage";
 
 export async function generateMetadata() {
-  const language = normalizeLanguage((await cookies()).get("ev-platform-language")?.value || defaultLanguage);
+  const language = await getRequestLanguage();
   return {
     title: `${getMessage(language, "costGuideTitle")} | EV Platform`,
     description: getMessage(language, "costGuideIntro"),

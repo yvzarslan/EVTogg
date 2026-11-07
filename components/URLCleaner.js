@@ -19,8 +19,8 @@ export default function URLCleaner() {
     const preservedQuery = preservedParams.toString();
     if (preservedQuery === currentQuery) return;
 
-    const query = preservedQuery ? `?${preservedQuery}` : '';
-    window.history.replaceState(null, '', `${pathname}${query}${window.location.hash}`);
+    const query = preservedQuery ? `?${preservedQuery}` : "";
+    window.history.replaceState(null, "", `${pathname}${query}${window.location.hash}`);
   }, [searchParams, pathname]);
 
   return null;

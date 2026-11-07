@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "./LanguageProvider";
 import { getMessage } from "@/lib/i18n";
@@ -8,30 +8,11 @@ import { getMessage } from "@/lib/i18n";
 const initialInputs = {
   annualDistance: "15000",
   evConsumption: "18",
-  homeChargingShare: "80",
+  homeChargingShare: "10",
   homeElectricityRate: "",
   publicElectricityRate: "",
   petrolConsumption: "7",
   petrolRate: "",
-  evPrice: "",
-  petrolCarPrice: "",
-};
-
-const monetaryInputs = [
-  "homeElectricityRate",
-  "publicElectricityRate",
-  "petrolRate",
-  "evPrice",
-  "petrolCarPrice",
-];
-
-const currencyByLanguage = {
-  tr: "TRY",
-  en: "USD",
-  fr: "EUR",
-  de: "EUR",
-  ru: "RUB",
-  zh: "CNY",
 };
 
 function parsePositiveNumber(value) {
@@ -51,61 +32,55 @@ function formatCurrency(value, language, currency) {
 export default function CostGuide() {
   const { language } = useLanguage();
   const [inputs, setInputs] = useState(initialInputs);
-  const [currency, setCurrency] = useState(currencyByLanguage[language]);
-  const [rateStatus, setRateStatus] = useState("ready");
+  const [currency, setCurrency] = useState("USD");
+  const [priceData, setPriceData] = useState(null);
+  const [rateStatus, setRateStatus] = useState("loading");
   const [rateRetry, setRateRetry] = useState(0);
-  const currencyRef = useRef(currencyByLanguage[language]);
 
   useEffect(() => {
-    const targetCurrency = currencyByLanguage[language];
-    if (targetCurrency === currencyRef.current) {
-      setRateStatus("ready");
-      return undefined;
-    }
-
     const controller = new AbortController();
     setRateStatus("loading");
 
-    async function convertInputs() {
+    async function loadCountryPrices() {
       try {
-        const response = await fetch("/api/exchange-rates", { signal: controller.signal });
+        const response = await fetch("/api/cost-prices", { signal: controller.signal });
         if (!response.ok) {
-          throw new Error(`Exchange rate request failed with status ${response.status}`);
+          throw new Error(`Country price request failed with status ${response.status}`);
         }
 
         const data = await response.json();
-        const sourceRate = Number(data.rates?.[currencyRef.current]);
-        const targetRate = Number(data.rates?.[targetCurrency]);
-        if (!Number.isFinite(sourceRate) || sourceRate <= 0 || !Number.isFinite(targetRate) || targetRate <= 0) {
-          throw new Error("The requested exchange rates are missing or invalid.");
+        const rates = {
+          homeElectricityRate: Number(data.rates?.homeElectricityRate),
+          publicElectricityRate: Number(data.rates?.publicElectricityRate),
+          petrolRate: Number(data.rates?.petrolRate),
+        };
+        if (
+          !data.currency ||
+          Object.values(rates).some((rate) => !Number.isFinite(rate) || rate <= 0)
+        ) {
+          throw new Error("The localized price estimate response is invalid.");
         }
 
-        const conversionFactor = targetRate / sourceRate;
         setInputs((current) => ({
           ...current,
-          ...Object.fromEntries(monetaryInputs.map((name) => {
-            const amount = current[name].trim() === "" ? null : Number(current[name]);
-            return [
-              name,
-              amount !== null && Number.isFinite(amount)
-                ? String(Number((amount * conversionFactor).toFixed(8)))
-                : current[name],
-            ];
-          })),
+          ...Object.fromEntries(Object.entries(rates).map(([name, rate]) => [
+            name,
+            current[name] === "" ? String(Number(rate.toFixed(6))) : current[name],
+          ])),
         }));
-        currencyRef.current = targetCurrency;
-        setCurrency(targetCurrency);
+        setCurrency(data.currency);
+        setPriceData(data);
         setRateStatus("ready");
       } catch (error) {
         if (error.name === "AbortError") return;
-        console.error("Could not convert calculator values to the selected currency.", error);
+        console.error("Could not load country-specific price estimates.", error);
         setRateStatus("error");
       }
     }
 
-    convertInputs();
+    loadCountryPrices();
     return () => controller.abort();
-  }, [language, rateRetry]);
+  }, [rateRetry]);
 
   const results = useMemo(() => {
     const annualDistance = parsePositiveNumber(inputs.annualDistance);
@@ -137,14 +112,7 @@ export default function CostGuide() {
     const annualSavings = evAnnualCost !== null && petrolAnnualCost !== null
       ? petrolAnnualCost - evAnnualCost
       : null;
-    const evPrice = parsePositiveNumber(inputs.evPrice);
-    const petrolCarPrice = parsePositiveNumber(inputs.petrolCarPrice);
-    const pricePremium = evPrice && petrolCarPrice ? evPrice - petrolCarPrice : null;
-    const paybackYears = pricePremium > 0 && annualSavings > 0
-      ? pricePremium / annualSavings
-      : null;
-
-    return { evAnnualCost, petrolAnnualCost, annualSavings, pricePremium, paybackYears };
+    return { evAnnualCost, petrolAnnualCost, annualSavings };
   }, [inputs]);
 
   const updateInput = (event) => {
@@ -176,7 +144,7 @@ export default function CostGuide() {
   const fieldClassName = "mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
 
   const renderField = (name, label, unit, step = "1") => {
-    const usesThousandsSeparator = ["annualDistance", "evPrice", "petrolCarPrice"].includes(name);
+    const usesThousandsSeparator = name === "annualDistance";
     const value = usesThousandsSeparator && inputs[name] !== ""
       ? new Intl.NumberFormat(language, { maximumFractionDigits: name === "annualDistance" ? 0 : 2 }).format(Number(inputs[name]))
       : inputs[name];
@@ -184,9 +152,7 @@ export default function CostGuide() {
       ? `${currency}/kWh`
       : name === "petrolRate"
         ? `${currency}/L`
-        : name === "evPrice" || name === "petrolCarPrice"
-          ? currency
-          : unit;
+        : unit;
 
     return (
       <label key={name} className="block text-sm font-bold text-slate-700">
@@ -251,8 +217,6 @@ export default function CostGuide() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {renderField("petrolConsumption", getMessage(language, "costPetrolConsumption"), "L/100 km", "0.1")}
                 {renderField("petrolRate", getMessage(language, "costPetrolRate"), `${currency}/L`, "0.01")}
-                {renderField("evPrice", getMessage(language, "costEvPrice"), currency, "1000")}
-                {renderField("petrolCarPrice", getMessage(language, "costPetrolCarPrice"), currency, "1000")}
               </div>
             </fieldset>
           </div>
@@ -261,14 +225,62 @@ export default function CostGuide() {
             {getMessage(language, "costInputNotice")}
           </p>
           <div className="mt-4 text-sm leading-6 text-slate-600" aria-live="polite">
-            {rateStatus === "loading" && <p>{getMessage(language, "costExchangeLoading")}</p>}
+            {rateStatus === "loading" && <p>{getMessage(language, "costPricesLoading")}</p>}
             {rateStatus === "error" && (
               <p role="alert" className="font-semibold text-rose-700">
-                {getMessage(language, "costExchangeError")}{" "}
+                {getMessage(language, "costPricesError")}{" "}
                 <button type="button" onClick={() => setRateRetry((attempt) => attempt + 1)} className="underline underline-offset-2">
                   {getMessage(language, "retry")}
                 </button>
               </p>
+            )}
+            {rateStatus === "ready" && (
+              <>
+                <p>
+                  {priceData?.sources
+                    ? getMessage(language, "costPricesSourceNote")
+                    : getMessage(language, "costPricesEstimateNote")}
+                </p>
+                {priceData?.electricityDataPeriod && (
+                  <p className="mt-2">
+                    {getMessage(language, "costPricesElectricityDataPeriod").replace(
+                      "{period}",
+                      priceData.electricityDataPeriod
+                    )}
+                  </p>
+                )}
+                {priceData?.location && (
+                  <p className="mt-2">
+                    {getMessage(
+                      language,
+                      priceData.locationIsFallback
+                        ? "costPricesFallbackLocation"
+                        : "costPricesLocation"
+                    ).replace("{location}", priceData.location)}
+                  </p>
+                )}
+                {priceData?.sources && (
+                  <ul className="mt-2 space-y-1">
+                    {[
+                      ["homeElectricity", "costPricesSourceHome"],
+                      ["publicCharging", "costPricesSourcePublic"],
+                      ["petrol", "costPricesSourceFuel"],
+                    ].map(([source, label]) => (
+                      <li key={source}>
+                        {getMessage(language, label)}:{" "}
+                        <a
+                          href={priceData.sources[source].url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-semibold text-blue-700 underline underline-offset-2"
+                        >
+                          {priceData.sources[source].name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </div>
         </section>
@@ -298,18 +310,6 @@ export default function CostGuide() {
               </dt>
               <dd className={`mt-1 text-2xl font-black ${results.annualSavings === null ? "text-slate-400" : results.annualSavings >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
                 {results.annualSavings === null ? "—" : formatCurrency(Math.abs(results.annualSavings), language, currency)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-semibold text-slate-600">{getMessage(language, "costPayback")}</dt>
-              <dd className="mt-1 text-2xl font-black text-slate-900">
-                {results.paybackYears !== null
-                  ? `${new Intl.NumberFormat(language, { maximumFractionDigits: 1 }).format(results.paybackYears)} ${getMessage(language, "costYears")}`
-                  : results.pricePremium !== null && results.pricePremium <= 0
-                    ? getMessage(language, "costNoPremium")
-                    : results.annualSavings !== null && results.annualSavings <= 0
-                      ? getMessage(language, "costNoPayback")
-                      : "—"}
               </dd>
             </div>
           </dl>

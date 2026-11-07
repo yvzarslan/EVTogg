@@ -23,7 +23,7 @@ export default function SiteHeader({ showVehicleNews, showChargingStations }) {
           {showChargingStations && <ScrollLink targetId="sarj" className="transition hover:text-blue-300">{getMessage(language, "chargingStations")}</ScrollLink>}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="hidden">
           <LanguageSwitcher />
         </div>
       </div>
