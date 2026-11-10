@@ -18,15 +18,16 @@ export default function EVCard({ car, isSelected, onSelect, onDetails }) {
     const controller = new AbortController();
     const loadPower = async () => {
       try {
-        const response = await fetch(`/api/vehicle-details/${encodeURIComponent(car.id)}`, {
+        const response = await fetch(`/api/vehicle-power/${encodeURIComponent(car.id)}`, {
           signal: controller.signal,
+          cache: "no-store",
         });
         if (!response.ok) {
           throw new Error(`Vehicle power request failed with status ${response.status}`);
         }
 
         const data = await response.json();
-        setPower(data.car.power || "");
+        setPower(data.power || "");
         setIsPowerLoaded(true);
       } catch (error) {
         if (error.name === "AbortError") return;
