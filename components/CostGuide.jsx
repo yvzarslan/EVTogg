@@ -8,7 +8,7 @@ import { getMessage } from "@/lib/i18n";
 const initialInputs = {
   annualDistance: "15000",
   evConsumption: "18",
-  homeChargingShare: "10",
+  homeChargingShare: "0",
   homeElectricityRate: "",
   publicElectricityRate: "",
   petrolConsumption: "7",
