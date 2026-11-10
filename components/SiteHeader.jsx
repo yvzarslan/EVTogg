@@ -11,7 +11,7 @@ export default function SiteHeader({ showVehicleNews, showChargingStations }) {
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-slate-950/90 text-white backdrop-blur-xl">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
-        <ScrollLink targetId="hero" className="flex shrink-0 items-center gap-3" aria-label={getMessage(language, "home")}>
+        <ScrollLink targetId="hero" prefetch className="flex shrink-0 items-center gap-3" aria-label={getMessage(language, "home")}>
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-cyan-300 text-sm font-black text-slate-950 shadow-lg shadow-blue-500/30">
             E
           </span>

@@ -180,7 +180,7 @@ export default function CostGuide() {
     <main className="min-h-screen bg-slate-50 pb-20">
       <section className="bg-slate-950 px-4 py-14 text-white sm:py-20">
         <div className="container mx-auto max-w-5xl">
-          <Link href="/" className="text-sm font-bold text-blue-300 transition hover:text-white">
+          <Link href="/" prefetch className="text-sm font-bold text-blue-300 transition hover:text-white">
             ← {getMessage(language, "home")}
           </Link>
           <p className="mt-8 text-xs font-black uppercase tracking-[0.24em] text-cyan-300">{getMessage(language, "costGuideEyebrow")}</p>
