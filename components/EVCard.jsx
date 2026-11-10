@@ -1,15 +1,64 @@
 import Image from "next/image";
-import { vehicleSpecifications } from "@/lib/vehicleSpecifications";
+import { useEffect, useRef, useState } from "react";
+import { vehicleCardSpecifications } from "@/lib/vehicleSpecifications";
 import { vehicleSpecificationIcons } from "@/lib/vehicleSpecificationIcons";
 import { useLanguage } from "./LanguageProvider";
 import { getMessage, getSpecificationLabel, getVehicleValue } from "@/lib/i18n";
 
 export default function EVCard({ car, isSelected, onSelect, onDetails }) {
   const { language } = useLanguage();
+  const cardRef = useRef(null);
+  const [power, setPower] = useState("");
+  const [isPowerLoaded, setIsPowerLoaded] = useState(false);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return undefined;
+
+    const controller = new AbortController();
+    const loadPower = async () => {
+      try {
+        const response = await fetch(`/api/vehicle-details/${encodeURIComponent(car.id)}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Vehicle power request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        setPower(data.car.power || "");
+        setIsPowerLoaded(true);
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        console.error(`Araç gücü yüklenemedi (${car.id}):`, error);
+        setIsPowerLoaded(true);
+      }
+    };
+
+    if (!("IntersectionObserver" in window)) {
+      loadPower();
+      return () => controller.abort();
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        loadPower();
+      }
+    }, { rootMargin: "200px" });
+    observer.observe(card);
+
+    return () => {
+      observer.disconnect();
+      controller.abort();
+    };
+  }, [car.id]);
+
   if (!car) return null;
 
   return (
     <div
+      ref={cardRef}
       className={`group relative flex h-full w-full max-w-[420px] flex-col overflow-hidden rounded-[2rem] border bg-white shadow-[0_30px_80px_-45px_rgba(15,23,42,0.65)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_35px_100px_-35px_rgba(59,130,246,0.5)] ${
         isSelected ? 'border-blue-600 ring-4 ring-blue-50' : 'border-slate-200/80'
       }`}
@@ -63,7 +112,7 @@ export default function EVCard({ car, isSelected, onSelect, onDetails }) {
         </div>
 
         <div className="grid flex-1 grid-cols-2 gap-2">
-          {vehicleSpecifications.map(({ label, key }) => {
+          {vehicleCardSpecifications.map(({ label, key }) => {
             const Icon = vehicleSpecificationIcons[key];
             return (
               <div key={key} className="flex min-w-0 items-center gap-2 rounded-xl bg-slate-50 p-2.5">
@@ -72,7 +121,11 @@ export default function EVCard({ car, isSelected, onSelect, onDetails }) {
                 </span>
                 <div className="min-w-0">
                   <span className="block text-[10px] font-bold leading-tight text-slate-500">{getSpecificationLabel(language, key) || label}</span>
-                  <b className="mt-1 block break-words text-sm text-slate-900">{getVehicleValue(language, car, key) || "—"}</b>
+                  <b className="mt-1 block break-words text-sm text-slate-900">
+                    {key === "power"
+                      ? power || (isPowerLoaded ? getMessage(language, "unknown") : "—")
+                      : getVehicleValue(language, car, key) || "—"}
+                  </b>
                 </div>
               </div>
             );

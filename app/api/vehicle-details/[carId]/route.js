@@ -23,6 +23,7 @@ export async function GET(_request, { params }) {
         battery: details.battery,
         range: details.range,
         efficiency: details.efficiency,
+        power: details.power,
         realRangeEstimation: details.realRangeEstimation,
         longDistanceSuitability: details.longDistanceSuitability,
       },
