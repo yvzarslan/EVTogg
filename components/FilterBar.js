@@ -5,6 +5,38 @@ import { useLanguage } from "./LanguageProvider";
 import { useFilters } from "./FilterProvider";
 import { getMessage, getSegmentTranslation, getBodyStyleTranslation } from "@/lib/i18n";
 
+function FilterSlider({ id, label, value, min, max, step = 1, formatValue, onChange }) {
+  const [draftValue, setDraftValue] = useState(String(value));
+
+  const commitValue = (nextValue) => {
+    const numericValue = Number(nextValue);
+    setDraftValue(String(numericValue));
+    if (numericValue !== Number(value)) onChange(numericValue);
+  };
+
+  return (
+    <div className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200/80">
+      <div className="mb-2 flex items-center justify-between gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+        <label htmlFor={id}>{label}</label>
+        <span className="text-blue-600">{formatValue(draftValue)}</span>
+      </div>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={draftValue}
+        onChange={(event) => setDraftValue(event.target.value)}
+        onPointerUp={(event) => commitValue(event.currentTarget.value)}
+        onKeyUp={(event) => commitValue(event.currentTarget.value)}
+        onBlur={(event) => commitValue(event.currentTarget.value)}
+        className="w-full accent-blue-600"
+      />
+    </div>
+  );
+}
+
 function SearchableFilter({
   id,
   label,
@@ -226,36 +258,25 @@ export default function FilterBar({
           setOpenFilter={setOpenFilter}
         />
 
-        <div className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200/80">
-          <div className="mb-2 flex items-center justify-between gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-            <span>{getMessage(language, "rangeFilter")}</span>
-            <span className="text-blue-600">{filters.range} km</span>
-          </div>
-          <input
-            type="range"
-            min="100"
-            max="1000"
-            value={filters.range}
-            onChange={(e) => updateFilters((current) => ({...current, range: e.target.value}))}
-            className="w-full accent-blue-600"
-          />
-        </div>
-
-        <div className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200/80">
-          <div className="mb-2 flex items-center justify-between gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-            <span>{getMessage(language, "accelerationFilter")}</span>
-            <span className="text-blue-600">{filters.accel} {getMessage(language, "seconds")}</span>
-          </div>
-          <input
-            type="range"
-            min="2"
-            max="15"
-            step="0.1"
-            value={filters.accel}
-            onChange={(e) => updateFilters((current) => ({...current, accel: e.target.value}))}
-            className="w-full accent-blue-600"
-          />
-        </div>
+        <FilterSlider
+          id="range-filter"
+          label={getMessage(language, "rangeFilter")}
+          value={filters.range}
+          min={100}
+          max={1000}
+          formatValue={(value) => `${value} km`}
+          onChange={(range) => updateFilters((current) => ({ ...current, range }))}
+        />
+        <FilterSlider
+          id="acceleration-filter"
+          label={getMessage(language, "accelerationFilter")}
+          value={filters.accel}
+          min={2}
+          max={15}
+          step={0.1}
+          formatValue={(value) => `${value} ${getMessage(language, "seconds")}`}
+          onChange={(accel) => updateFilters((current) => ({ ...current, accel }))}
+        />
       </div>
     </div>
   );
