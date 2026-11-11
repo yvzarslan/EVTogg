@@ -20,6 +20,7 @@ export default async function HomePage({ searchParams }) {
 
   const filters = {
     brand: params.brand || '',
+    model: params.model || '',
     range: params.range || '',
     accel: params.accel || '',
     segment: params.segment || '',
@@ -36,6 +37,12 @@ export default async function HomePage({ searchParams }) {
   const uniqueBrands = [...new Set(sortedCars.map((car) => car.brand))].sort((a, b) =>
     a.localeCompare(b, 'tr')
   );
+  const brandOptions = uniqueBrands.map((brand) => ({
+    brand,
+    models: sortedCars
+      .filter((car) => car.brand === brand)
+      .map(({ id, model }) => ({ id, model })),
+  }));
   const uniqueSegments = [...new Set(sortedCars.map((car) => car.segmentCode).filter(Boolean))]
     .sort((a, b) => segmentLabels[a].localeCompare(segmentLabels[b], 'tr'));
   const uniqueBodyStyles = [...new Set(sortedCars.map((car) => car.bodyStyleCode).filter(Boolean))]
@@ -55,7 +62,7 @@ export default async function HomePage({ searchParams }) {
 
       <section id="araclar" className="container mx-auto px-4">
         <FilterBar
-          initialBrands={uniqueBrands}
+          initialBrands={brandOptions}
           initialSegments={uniqueSegments}
           initialBodyStyles={uniqueBodyStyles}
         />

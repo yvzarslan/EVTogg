@@ -15,6 +15,7 @@ function matchesFilters(car, filters) {
   const accel = Number(filters.accel);
 
   if (brand && car.brand.toLowerCase() !== brand) return false;
+  if (filters.model && car.model.toLocaleLowerCase() !== filters.model.toLocaleLowerCase()) return false;
   if (filters.segment && car.segmentCode !== filters.segment) return false;
   if (filters.bodyStyle && car.bodyStyleCode !== filters.bodyStyle) return false;
   if (range && Number.parseFloat((car.range || "").replace(/[^\d.]/g, "")) < range) return false;

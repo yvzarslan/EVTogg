@@ -7,6 +7,7 @@ const FilterContext = createContext(null);
 export function FilterProvider({ children, initialFilters }) {
   const [filters, setFilters] = useState({
     brand: initialFilters.brand || "",
+    model: initialFilters.model || "",
     range: initialFilters.range || 660,
     accel: initialFilters.accel || 10,
     segment: initialFilters.segment || "",

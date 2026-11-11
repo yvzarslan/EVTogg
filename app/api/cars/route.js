@@ -6,6 +6,7 @@ export async function GET(req) {
 
   const filters = {
     brand: searchParams.get("brand") || "",
+    model: searchParams.get("model") || "",
     range: searchParams.get("range") || "",
     accel: searchParams.get("accel") || "",
     segment: searchParams.get("segment") || "",

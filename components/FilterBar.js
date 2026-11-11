@@ -43,7 +43,9 @@ function SearchableFilter({
   allLabel,
   searchPlaceholder,
   emptyMessage,
+  searchEmptyMessage,
   options,
+  searchOptions = [],
   value,
   onChange,
   language,
@@ -55,10 +57,12 @@ function SearchableFilter({
   const triggerRef = useRef(null);
   const searchRef = useRef(null);
   const listRef = useRef(null);
-  const filteredOptions = options.filter((option) =>
-    option.label.toLocaleLowerCase(language).includes(search.trim().toLocaleLowerCase(language))
+  const normalizedSearch = search.trim().toLocaleLowerCase(language);
+  const optionsToFilter = normalizedSearch && searchOptions.length > 0 ? searchOptions : options;
+  const filteredOptions = optionsToFilter.filter((option) =>
+    option.label.toLocaleLowerCase(language).includes(normalizedSearch)
   );
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedOption = [...options, ...searchOptions].find((option) => option.value === value);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -183,7 +187,9 @@ function SearchableFilter({
                 </div>
               ))}
               {filteredOptions.length === 0 && (
-                <p className="px-3 py-2.5 text-sm text-slate-500">{emptyMessage}</p>
+                <p className="px-3 py-2.5 text-sm text-slate-500">
+                  {normalizedSearch ? searchEmptyMessage : emptyMessage}
+                </p>
               )}
             </div>
           </div>
@@ -201,7 +207,24 @@ export default function FilterBar({
   const { language } = useLanguage();
   const { filters, updateFilters } = useFilters();
   const [openFilter, setOpenFilter] = useState(null);
-  const brandOptions = initialBrands.map((brand) => ({ value: brand, label: brand }));
+  const brandOptions = initialBrands.map(({ brand }) => ({
+    value: `brand:${brand}`,
+    brand,
+    model: "",
+    label: brand,
+  }));
+  const modelOptions = initialBrands.flatMap(({ brand, models = [] }) =>
+    models.map(({ id, model }) => ({
+      value: `model:${id}`,
+      brand,
+      model,
+      label: model,
+    }))
+  );
+  const allBrandOptions = [...brandOptions, ...modelOptions];
+  const selectedBrandOption = allBrandOptions.find(
+    (option) => option.brand === filters.brand && option.model === (filters.model || "")
+  );
   const segmentOptions = initialSegments.map((segment) => ({
     value: segment,
     label: getSegmentTranslation(language, segment, segmentLabels[segment] || segment),
@@ -224,9 +247,18 @@ export default function FilterBar({
           allLabel={getMessage(language, "allBrands")}
           searchPlaceholder={getMessage(language, "searchBrands")}
           emptyMessage={getMessage(language, "noBrandsFound")}
+          searchEmptyMessage={getMessage(language, "noModelsFound")}
           options={brandOptions}
-          value={filters.brand}
-          onChange={(brand) => updateFilters((current) => ({ ...current, brand }))}
+          searchOptions={modelOptions}
+          value={selectedBrandOption?.value || ""}
+          onChange={(value) => {
+            const option = allBrandOptions.find((item) => item.value === value);
+            updateFilters((current) => ({
+              ...current,
+              brand: option?.brand || "",
+              model: option?.model || "",
+            }));
+          }}
           language={language}
           isOpen={openFilter === "brand-filter"}
           setOpenFilter={setOpenFilter}
