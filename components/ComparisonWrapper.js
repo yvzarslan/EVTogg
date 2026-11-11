@@ -14,6 +14,11 @@ function matchesFilters(car, filters, activeFilters) {
   const range = Number(filters.range);
   const accel = Number(filters.accel);
 
+  if (filters.model && (activeFilters.includes("brand") || activeFilters.includes("model"))) {
+    return (!brand || car.brand.toLowerCase() === brand)
+      && car.model.toLocaleLowerCase() === filters.model.toLocaleLowerCase();
+  }
+
   if (activeFilters.includes("brand") && brand && car.brand.toLowerCase() !== brand) return false;
   if ((activeFilters.includes("brand") || activeFilters.includes("model")) && filters.model
     && car.model.toLocaleLowerCase() !== filters.model.toLocaleLowerCase()) return false;
