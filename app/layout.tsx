@@ -4,7 +4,6 @@ import './globals.css';
 import { Suspense } from 'react'; // 1. Adım: Suspense'i import et
 import URLCleaner from '@/components/URLCleaner';
 import ScrollToTop from '@/components/ScrollToTop'; // 1. Adım: Import et
-import { showChargingStations, showVehicleNews } from '@/lib/features';
 import { getMessage } from '@/lib/i18n';
 import { getRequestLanguage } from '@/lib/requestLanguage';
 import { LanguageProvider } from '@/components/LanguageProvider';
@@ -29,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Suspense fallback={null}>
             <URLCleaner />
           </Suspense>
-          <SiteHeader showVehicleNews={showVehicleNews} showChargingStations={showChargingStations} />
+          <SiteHeader />
           {children}
           <ScrollToTop hideOnHome />
         </LanguageProvider>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight, Calculator } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 import { getMessage } from "@/lib/i18n";
 
@@ -141,7 +142,7 @@ export default function CostGuide() {
     setInputs((current) => ({ ...current, [name]: normalized }));
   };
 
-  const fieldClassName = "mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+  const fieldClassName = "mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-lime-500 focus:ring-2 focus:ring-lime-100";
 
   const renderField = (name, label, unit, step = "1") => {
     const usesThousandsSeparator = name === "annualDistance";
@@ -177,26 +178,36 @@ export default function CostGuide() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-20">
-      <section className="bg-slate-950 px-4 py-14 text-white sm:py-20">
-        <div className="container mx-auto max-w-5xl">
-          <Link href="/" prefetch className="text-sm font-bold text-blue-300 transition hover:text-white">
-            ← {getMessage(language, "home")}
-          </Link>
-          <p className="mt-8 text-xs font-black uppercase tracking-[0.24em] text-cyan-300">{getMessage(language, "costGuideEyebrow")}</p>
-          <h1 className="mt-3 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">{getMessage(language, "costGuideTitle")}</h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">{getMessage(language, "costGuideIntro")}</p>
+    <main className="min-h-screen bg-[#f5f7fa] pb-20">
+      <section className="hero-section px-4 pb-5 pt-4 sm:px-6 lg:px-8">
+        <div className="hero-panel relative mx-auto max-w-[1320px] overflow-hidden rounded-[26px] bg-[#edf2f7] px-6 py-9 sm:px-10 md:min-h-[330px] md:px-12 md:py-12">
+          <div className="absolute -right-10 -top-20 hidden h-[410px] w-[54%] items-center justify-center rounded-full bg-gradient-to-br from-white/80 via-slate-100 to-[#dce6ee] md:flex">
+            <div className="flex h-40 w-40 items-center justify-center rounded-[36px] border border-white/80 bg-white/70 text-lime-600 shadow-[0_30px_70px_-35px_rgba(16,36,71,0.28)] backdrop-blur">
+              <Calculator size={76} strokeWidth={1.2} />
+            </div>
+          </div>
+          <div className="relative z-10 max-w-2xl">
+            <Link href="/" prefetch className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-slate-950">
+              <ArrowLeft size={15} /> {getMessage(language, "home")}
+            </Link>
+            <p className="mt-7 text-xs font-black uppercase tracking-[0.2em] text-lime-700">{getMessage(language, "costGuideEyebrow")}</p>
+            <h1 className="mt-3 max-w-2xl text-3xl font-extrabold leading-tight tracking-[-0.04em] text-[#102447] sm:text-5xl">{getMessage(language, "costGuideTitle")}</h1>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">{getMessage(language, "costGuideIntro")}</p>
+            <Link href="#cost-calculator" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#9bea21] px-5 text-sm font-extrabold text-slate-950 transition hover:bg-[#8bd91a]">
+              {getMessage(language, "costCalculatorTitle")} <ArrowRight size={15} />
+            </Link>
+          </div>
         </div>
       </section>
 
-      <div className="container mx-auto mt-8 grid max-w-6xl gap-6 px-4 lg:grid-cols-[1.4fr_0.8fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <h2 className="text-2xl font-black text-slate-900">{getMessage(language, "costCalculatorTitle")}</h2>
+      <div id="cost-calculator" className="mx-auto mt-5 grid max-w-[1240px] scroll-mt-24 gap-5 px-4 sm:px-6 lg:grid-cols-[1.4fr_0.8fr] lg:px-8">
+        <section className="rounded-[20px] border border-slate-200/80 bg-white p-5 shadow-[0_14px_40px_-32px_rgba(15,23,42,0.4)] sm:p-8">
+          <h2 className="text-2xl font-extrabold tracking-tight text-[#122747]">{getMessage(language, "costCalculatorTitle")}</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">{getMessage(language, "costCalculatorIntro")}</p>
 
           <div className="mt-7 space-y-8">
             <fieldset>
-              <legend className="mb-4 text-sm font-black uppercase tracking-wider text-blue-700">{getMessage(language, "costUsageTitle")}</legend>
+              <legend className="mb-4 text-sm font-black uppercase tracking-wider text-lime-700">{getMessage(language, "costUsageTitle")}</legend>
               <div className="grid gap-4 sm:grid-cols-2">
                 {renderField("annualDistance", getMessage(language, "costAnnualDistance"), "km")}
                 {renderField("evConsumption", getMessage(language, "costEvConsumption"), "kWh/100 km", "0.1")}
@@ -205,7 +216,7 @@ export default function CostGuide() {
             </fieldset>
 
             <fieldset>
-              <legend className="mb-4 text-sm font-black uppercase tracking-wider text-blue-700">{getMessage(language, "costElectricityTitle")}</legend>
+              <legend className="mb-4 text-sm font-black uppercase tracking-wider text-lime-700">{getMessage(language, "costElectricityTitle")}</legend>
               <div className="grid gap-4 sm:grid-cols-2">
                 {renderField("homeElectricityRate", getMessage(language, "costHomeRate"), `${currency}/kWh`, "0.01")}
                 {renderField("publicElectricityRate", getMessage(language, "costPublicRate"), `${currency}/kWh`, "0.01")}
@@ -213,7 +224,7 @@ export default function CostGuide() {
             </fieldset>
 
             <fieldset>
-              <legend className="mb-4 text-sm font-black uppercase tracking-wider text-blue-700">{getMessage(language, "costComparisonTitle")}</legend>
+              <legend className="mb-4 text-sm font-black uppercase tracking-wider text-lime-700">{getMessage(language, "costComparisonTitle")}</legend>
               <div className="grid gap-4 sm:grid-cols-2">
                 {renderField("petrolConsumption", getMessage(language, "costPetrolConsumption"), "L/100 km", "0.1")}
                 {renderField("petrolRate", getMessage(language, "costPetrolRate"), `${currency}/L`, "0.01")}
@@ -272,7 +283,7 @@ export default function CostGuide() {
                           href={priceData.sources[source].url}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-semibold text-blue-700 underline underline-offset-2"
+                          className="font-semibold text-lime-800 underline underline-offset-2"
                         >
                           {priceData.sources[source].name}
                         </a>
@@ -285,22 +296,22 @@ export default function CostGuide() {
           </div>
         </section>
 
-        <aside className="h-fit rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-sm sm:p-8">
-          <h2 className="text-2xl font-black text-slate-900">{getMessage(language, "costResultsTitle")}</h2>
+        <aside className="h-fit rounded-[20px] border border-lime-200/80 bg-gradient-to-br from-lime-50 via-white to-white p-5 shadow-[0_14px_40px_-32px_rgba(15,23,42,0.4)] sm:p-8 lg:sticky lg:top-24">
+          <h2 className="text-2xl font-extrabold tracking-tight text-[#122747]">{getMessage(language, "costResultsTitle")}</h2>
           <dl className="mt-6 space-y-5">
-            <div className="border-b border-blue-100 pb-4">
+            <div className="border-b border-lime-100 pb-4">
               <dt className="text-sm font-semibold text-slate-600">{getMessage(language, "costEvAnnual")}</dt>
               <dd className="mt-1 text-2xl font-black text-slate-900">
                 {results.evAnnualCost === null ? "—" : formatCurrency(results.evAnnualCost, language, currency)}
               </dd>
             </div>
-            <div className="border-b border-blue-100 pb-4">
+            <div className="border-b border-lime-100 pb-4">
               <dt className="text-sm font-semibold text-slate-600">{getMessage(language, "costPetrolAnnual")}</dt>
               <dd className="mt-1 text-2xl font-black text-slate-900">
                 {results.petrolAnnualCost === null ? "—" : formatCurrency(results.petrolAnnualCost, language, currency)}
               </dd>
             </div>
-            <div className="border-b border-blue-100 pb-4">
+            <div className="border-b border-lime-100 pb-4">
               <dt className="text-sm font-semibold text-slate-600">
                 {results.annualSavings === null
                   ? getMessage(language, "costAnnualDifference")
@@ -317,14 +328,14 @@ export default function CostGuide() {
         </aside>
       </div>
 
-      <section className="container mx-auto mt-8 max-w-6xl px-4">
+      <section className="mx-auto mt-8 max-w-[1240px] px-4 sm:px-6 lg:px-8">
         <div className="grid gap-6 md:grid-cols-2">
-          <article className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
-            <h2 className="text-xl font-black text-slate-900">{getMessage(language, "costMethodTitle")}</h2>
+          <article className="rounded-[20px] border border-slate-200/80 bg-white p-6 sm:p-8">
+            <h2 className="text-xl font-extrabold text-[#122747]">{getMessage(language, "costMethodTitle")}</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">{getMessage(language, "costMethodText")}</p>
           </article>
-          <article className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
-            <h2 className="text-xl font-black text-slate-900">{getMessage(language, "costLimitsTitle")}</h2>
+          <article className="rounded-[20px] border border-slate-200/80 bg-white p-6 sm:p-8">
+            <h2 className="text-xl font-extrabold text-[#122747]">{getMessage(language, "costLimitsTitle")}</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">{getMessage(language, "costLimitsText")}</p>
           </article>
         </div>

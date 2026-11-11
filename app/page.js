@@ -1,16 +1,17 @@
-import Hero from '@/components/Hero';
-import FilterBar from '@/components/FilterBar';
-import { FilterProvider } from '@/components/FilterProvider';
-import NewsSection from '@/components/NewsSection';
-import ChargingMap from '@/components/ChargingMap';
-import ComparisonWrapper from '@/components/ComparisonWrapper';
-import ScrollLink from '@/components/ScrollLink';
-import Link from 'next/link';
-import { scrapeEVData } from '@/lib/scraper';
-import { showChargingStations, showVehicleNews } from '@/lib/features';
-import { bodyStyleLabels, segmentLabels } from '@/lib/vehicleFilters';
-import { getMessage } from '@/lib/i18n';
-import { getRequestLanguage } from '@/lib/requestLanguage';
+import Hero from "@/components/Hero";
+import FilterBar from "@/components/FilterBar";
+import { FilterProvider } from "@/components/FilterProvider";
+import NewsSection from "@/components/NewsSection";
+import ChargingMap from "@/components/ChargingMap";
+import ComparisonWrapper from "@/components/ComparisonWrapper";
+import ScrollLink from "@/components/ScrollLink";
+import Link from "next/link";
+import { ArrowRight, Calculator, Newspaper, Scale, Zap } from "lucide-react";
+import { scrapeEVData } from "@/lib/scraper";
+import { showChargingStations, showVehicleNews } from "@/lib/features";
+import { bodyStyleLabels, segmentLabels } from "@/lib/vehicleFilters";
+import { getMessage } from "@/lib/i18n";
+import { getRequestLanguage } from "@/lib/requestLanguage";
 
 export const revalidate = 86400;
 
@@ -19,23 +20,23 @@ export default async function HomePage({ searchParams }) {
   const language = await getRequestLanguage();
 
   const filters = {
-    brand: params.brand || '',
-    model: params.model || '',
-    range: params.range || '',
-    accel: params.accel || '',
-    segment: params.segment || '',
-    bodyStyle: params.bodyStyle || '',
+    brand: params.brand || "",
+    model: params.model || "",
+    range: params.range || "",
+    accel: params.accel || "",
+    segment: params.segment || "",
+    bodyStyle: params.bodyStyle || "",
   };
 
   const allCars = await scrapeEVData({});
   const sortedCars = [...allCars].sort((a, b) => {
-    const brandCompare = a.brand.localeCompare(b.brand, 'tr');
+    const brandCompare = a.brand.localeCompare(b.brand, "tr");
     if (brandCompare !== 0) return brandCompare;
-    return a.model.localeCompare(b.model, 'tr');
+    return a.model.localeCompare(b.model, "tr");
   });
 
   const uniqueBrands = [...new Set(sortedCars.map((car) => car.brand))].sort((a, b) =>
-    a.localeCompare(b, 'tr')
+    a.localeCompare(b, "tr")
   );
   const brandOptions = uniqueBrands.map((brand) => ({
     brand,
@@ -44,129 +45,136 @@ export default async function HomePage({ searchParams }) {
       .map(({ id, model }) => ({ id, model })),
   }));
   const uniqueSegments = [...new Set(sortedCars.map((car) => car.segmentCode).filter(Boolean))]
-    .sort((a, b) => segmentLabels[a].localeCompare(segmentLabels[b], 'tr'));
+    .sort((a, b) => (segmentLabels[a] || a).localeCompare(segmentLabels[b] || b, "tr"));
   const uniqueBodyStyles = [...new Set(sortedCars.map((car) => car.bodyStyleCode).filter(Boolean))]
-    .sort((a, b) => bodyStyleLabels[a].localeCompare(bodyStyleLabels[b], 'tr'));
+    .sort((a, b) => (bodyStyleLabels[a] || a).localeCompare(bodyStyleLabels[b] || b, "tr"));
 
   const publicDisplayCars = sortedCars.map((car) => ({
     ...car,
     image: `/api/vehicle-image/${encodeURIComponent(car.id)}`,
   }));
 
+  const featureCards = [
+    {
+      title: getMessage(language, "featureComparison"),
+      text: getMessage(language, "featureComparisonDescription"),
+      icon: Scale,
+      target: "araclar",
+      linkLabel: getMessage(language, "viewVehicles"),
+    },
+    {
+      title: getMessage(language, "costGuideNav"),
+      text: getMessage(language, "featureCostDescription"),
+      icon: Calculator,
+      href: "/maliyet-hesaplama",
+      linkLabel: getMessage(language, "costGuideNav"),
+    },
+    {
+      title: getMessage(language, "featureUpdates"),
+      text: getMessage(language, "featureUpdatesDescription"),
+      icon: Newspaper,
+      ...(showVehicleNews ? { target: "haberler" } : {}),
+      linkLabel: getMessage(language, "news"),
+    },
+  ];
+
   return (
     <FilterProvider initialFilters={filters}>
-      <main className="bg-[#f8fafc] min-h-screen pb-20">
-      <section id="hero">
-        <Hero />
-      </section>
-
-      <section id="araclar" className="container mx-auto px-4">
-        <FilterBar
-          initialBrands={brandOptions}
-          initialSegments={uniqueSegments}
-          initialBodyStyles={uniqueBodyStyles}
-        />
-      </section>
-
-      <section className="container mx-auto py-16 px-4">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-2 h-10 bg-blue-600 rounded-full"></div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {getMessage(language, 'vehicleList')}
-          </h2>
-        </div>
-
-        <ComparisonWrapper allCars={publicDisplayCars} />
-      </section>
-
-      {showVehicleNews && (
-        <section id="haberler">
-          <NewsSection />
+      <main className="ev-home min-h-screen pb-16">
+        <section id="hero" className="scroll-mt-20">
+          <Hero />
         </section>
-      )}
 
-      {showChargingStations && (
-        <section id="sarj">
-          <ChargingMap />
+        <section id="araclar" className="scroll-mt-24 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-[1240px]">
+            <div className="mb-3 flex items-center gap-2 pl-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+              <Zap size={14} className="text-lime-600" />
+              {getMessage(language, "quickSearch")}
+            </div>
+            <FilterBar
+              initialBrands={brandOptions}
+              initialSegments={uniqueSegments}
+              initialBodyStyles={uniqueBodyStyles}
+            />
+          </div>
         </section>
-      )}
 
-      <section className="container mx-auto mt-20 px-4">
-        <div className="grid gap-5 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-[0_30px_80px_-45px_rgba(37,99,235,0.75)] backdrop-blur-sm sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            {
-              title: getMessage(language, 'featureComparison'),
-              text: getMessage(language, 'featureComparisonDescription'),
-            },
-            ...(showChargingStations ? [{
-              title: getMessage(language, 'featureCharging'),
-              text: getMessage(language, 'featureChargingDescription'),
-            }] : []),
-            {
-              title: getMessage(language, 'featureUpdates'),
-              text: getMessage(language, 'featureUpdatesDescription'),
-            },
-            {
-              title: getMessage(language, 'costGuideNav'),
-              text: getMessage(language, 'featureCostDescription'),
-              href: '/maliyet-hesaplama',
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className={`rounded-2xl border border-slate-200 bg-slate-50 p-5 ${item.href ? "transition hover:border-blue-300 hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-500" : ""}`}
-            >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-xl text-blue-600">✓</div>
-              <h3 className="mb-2 text-xl font-extrabold text-slate-900">{item.title}</h3>
-              <p className="text-sm leading-6 text-slate-600">{item.text}</p>
-              {item.href && (
-                <Link href={item.href} className="mt-4 inline-flex text-sm font-black text-blue-700 hover:text-blue-900">
-                  {getMessage(language, 'costGuideNav')} →
+        <section className="mx-auto max-w-[1240px] px-4 pb-14 pt-12 sm:px-6 lg:px-8">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <span className="mb-2 block h-[3px] w-8 rounded-full bg-lime-400" />
+              <h2 className="text-2xl font-extrabold tracking-tight text-[#122747] sm:text-[28px]">
+                {getMessage(language, "featuredModels")}
+              </h2>
+            </div>
+            <ScrollLink targetId="araclar" className="hidden items-center gap-2 pb-1 text-xs font-bold text-slate-600 transition hover:text-slate-950 sm:inline-flex">
+              {getMessage(language, "viewAllModels")} <ArrowRight size={14} />
+            </ScrollLink>
+          </div>
+          <ComparisonWrapper allCars={publicDisplayCars} />
+        </section>
+
+        <section className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6 lg:px-8">
+          <div className="grid gap-3 md:grid-cols-3">
+            {featureCards.map((item) => {
+              const Icon = item.icon;
+              const content = (
+                <>
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-50 text-lime-600">
+                    <Icon size={22} strokeWidth={1.8} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-extrabold text-[#142746]">{item.title}</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-500">{item.text}</span>
+                    {(item.href || item.target) && (
+                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-slate-700">
+                        {item.linkLabel}
+                        <ArrowRight size={13} />
+                      </span>
+                    )}
+                  </span>
+                </>
+              );
+
+              return item.href ? (
+                <Link key={item.title} href={item.href} className="feature-card flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 transition hover:-translate-y-0.5 hover:border-lime-300 hover:shadow-lg">
+                  {content}
                 </Link>
-              )}
+              ) : item.target ? (
+                <ScrollLink key={item.title} targetId={item.target} className="feature-card flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 transition hover:-translate-y-0.5 hover:border-lime-300 hover:shadow-lg">
+                  {content}
+                </ScrollLink>
+              ) : (
+                <div key={item.title} className="feature-card flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-4">
+                  {content}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {showVehicleNews && (
+          <section id="haberler" className="scroll-mt-24">
+            <NewsSection />
+          </section>
+        )}
+
+        {showChargingStations && (
+          <section id="sarj" className="scroll-mt-24">
+            <ChargingMap />
+          </section>
+        )}
+
+        <footer className="border-t border-slate-200 bg-white">
+          <div className="mx-auto flex max-w-[1240px] flex-col gap-5 px-4 py-8 text-sm sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+            <div>
+              <div className="brand-mark text-xl"><span className="brand-ev-badge">EV</span><span className="ml-1.5">Platform</span></div>
+              <p className="mt-2 max-w-lg text-xs leading-5 text-slate-500">{getMessage(language, "footerDescription")}</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <footer className="mt-20 border-t border-slate-200 bg-slate-950 text-slate-200">
-        <div className="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-[1.5fr_1fr_1fr]">
-          <div>
-            <div className="mb-4 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-cyan-300 text-lg font-black text-slate-950">E</span>
-              <div>
-                <div className="text-lg font-black tracking-[0.18em] text-white uppercase">Platform</div>
-              </div>
-            </div>
-            <p className="max-w-md text-sm leading-6 text-slate-300">
-              {getMessage(language, 'footerDescription')}
-            </p>
+            <p className="max-w-xl text-xs leading-5 text-slate-500">{getMessage(language, "footerDisclaimer")}</p>
+            <p className="shrink-0 text-xs text-slate-400">{getMessage(language, "footerCopyright")}</p>
           </div>
-
-          <div>
-            <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">{getMessage(language, 'footerMenu')}</h4>
-            <ul className="space-y-2 text-sm text-slate-300">
-              <li><ScrollLink targetId="hero" className="transition hover:text-white">{getMessage(language, 'home')}</ScrollLink></li>
-              <li><ScrollLink targetId="araclar" className="transition hover:text-white">{getMessage(language, 'vehicles')}</ScrollLink></li>
-              {showVehicleNews && <li><ScrollLink targetId="haberler" className="transition hover:text-white">{getMessage(language, 'news')}</ScrollLink></li>}
-              {showChargingStations && <li><ScrollLink targetId="sarj" className="transition hover:text-white">{getMessage(language, 'chargingStations')}</ScrollLink></li>}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="mb-4 text-sm font-black tracking-[0.18em] text-blue-300 uppercase">{getMessage(language, 'footerNote')}</h4>
-            <p className="text-sm leading-6 text-slate-300">
-              {getMessage(language, 'footerDisclaimer')}
-            </p>
-          </div>
-        </div>
-
-        <div className="border-t border-slate-800">
-          <div className="container mx-auto px-4 py-5 text-center text-xs text-slate-400">
-            {getMessage(language, 'footerCopyright')}
-          </div>
-        </div>
-      </footer>
+        </footer>
       </main>
     </FilterProvider>
   );

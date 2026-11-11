@@ -13,16 +13,19 @@ export function FilterProvider({ children, initialFilters }) {
     segment: initialFilters.segment || "",
     bodyStyle: initialFilters.bodyStyle || "",
   });
-  const [hasActiveFilters, setHasActiveFilters] = useState(true);
+  const [activeFilters, setActiveFilters] = useState(() => Object.entries(initialFilters)
+    .filter(([, value]) => Boolean(value))
+    .map(([key]) => key));
 
   const value = useMemo(() => ({
     filters,
-    hasActiveFilters,
-    updateFilters(updater) {
+    activeFilters,
+    hasActiveFilters: activeFilters.length > 0,
+    updateFilters(updater, filterKey) {
       setFilters(updater);
-      setHasActiveFilters(true);
+      setActiveFilters((current) => current.includes(filterKey) ? current : [...current, filterKey]);
     },
-  }), [filters, hasActiveFilters]);
+  }), [filters, activeFilters]);
 
   return (
     <FilterContext.Provider value={value}>

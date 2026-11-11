@@ -16,12 +16,17 @@ export default async function ComparePage({ searchParams }) {
 
   if (selectedCars.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 text-center">
-        <h1 className="mb-4 text-2xl font-black text-slate-800">{getMessage(language, "noCarsToCompare")}</h1>
-        <Link href="/" className="rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-500">
-          {getMessage(language, "goBack")}
-        </Link>
-      </div>
+      <main className="min-h-[calc(100vh-72px)] bg-[#f5f7fa] px-4 py-4 sm:px-6 lg:px-8">
+        <section className="hero-panel mx-auto flex min-h-[330px] max-w-[1320px] flex-col items-start justify-center rounded-[26px] bg-[#edf2f7] px-6 py-10 sm:px-10 md:px-12">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-lime-700">{getMessage(language, "compare")}</p>
+          <h1 className="mt-4 max-w-2xl text-3xl font-extrabold tracking-[-0.04em] text-[#102447] sm:text-5xl">
+            {getMessage(language, "noCarsToCompare")}
+          </h1>
+          <Link href="/" className="mt-6 inline-flex min-h-11 items-center rounded-full bg-[#9bea21] px-6 text-sm font-extrabold text-slate-950 transition hover:bg-[#8bd91a]">
+            {getMessage(language, "goBack")}
+          </Link>
+        </section>
+      </main>
     );
   }
 

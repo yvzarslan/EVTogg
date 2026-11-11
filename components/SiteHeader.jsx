@@ -1,32 +1,19 @@
 "use client";
 
-import LanguageSwitcher from "./LanguageSwitcher";
 import ScrollLink from "./ScrollLink";
 import { useLanguage } from "./LanguageProvider";
 import { getMessage } from "@/lib/i18n";
 
-export default function SiteHeader({ showVehicleNews, showChargingStations }) {
+export default function SiteHeader() {
   const { language } = useLanguage();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-slate-950/90 text-white backdrop-blur-xl">
-      <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3">
-        <ScrollLink targetId="hero" prefetch className="flex shrink-0 items-center gap-3" aria-label={getMessage(language, "home")}>
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-cyan-300 text-sm font-black text-slate-950 shadow-lg shadow-blue-500/30">
-            E
-          </span>
-          <span className="text-sm font-black tracking-[0.18em] text-slate-200 uppercase">Platform</span>
+    <header className="site-header sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
+      <nav aria-label={getMessage(language, "home")} className="mx-auto flex h-[72px] max-w-[1320px] items-center px-5 lg:px-8">
+        <ScrollLink targetId="hero" className="brand-mark flex shrink-0 items-center" aria-label="EV Platform">
+          <span className="brand-ev-badge">EV</span><span className="ml-1.5">Platform</span>
         </ScrollLink>
-
-        <div className="hidden items-center gap-8 text-sm font-medium text-slate-200 md:flex">
-          {showVehicleNews && <ScrollLink targetId="haberler" className="transition hover:text-blue-300">{getMessage(language, "news")}</ScrollLink>}
-          {showChargingStations && <ScrollLink targetId="sarj" className="transition hover:text-blue-300">{getMessage(language, "chargingStations")}</ScrollLink>}
-        </div>
-
-        <div className="hidden">
-          <LanguageSwitcher />
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

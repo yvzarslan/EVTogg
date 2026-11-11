@@ -9,23 +9,29 @@ import { useLanguage } from "./LanguageProvider";
 import { useFilters } from "./FilterProvider";
 import { getMessage } from "@/lib/i18n";
 
-function matchesFilters(car, filters) {
+function matchesFilters(car, filters, activeFilters) {
   const brand = filters.brand?.toLowerCase();
   const range = Number(filters.range);
   const accel = Number(filters.accel);
 
-  if (brand && car.brand.toLowerCase() !== brand) return false;
-  if (filters.model && car.model.toLocaleLowerCase() !== filters.model.toLocaleLowerCase()) return false;
-  if (filters.segment && car.segmentCode !== filters.segment) return false;
-  if (filters.bodyStyle && car.bodyStyleCode !== filters.bodyStyle) return false;
-  if (range && Number.parseFloat((car.range || "").replace(/[^\d.]/g, "")) < range) return false;
-  if (accel && Number.parseFloat((car.accel || "").replace(/[^\d.]/g, "")) > accel) return false;
+  if (activeFilters.includes("brand") && brand && car.brand.toLowerCase() !== brand) return false;
+  if ((activeFilters.includes("brand") || activeFilters.includes("model")) && filters.model
+    && car.model.toLocaleLowerCase() !== filters.model.toLocaleLowerCase()) return false;
+  if (activeFilters.includes("segment") && filters.segment && car.segmentCode !== filters.segment) return false;
+  if (activeFilters.includes("bodyStyle") && filters.bodyStyle && car.bodyStyleCode !== filters.bodyStyle) return false;
+  if (activeFilters.length > 0 && range && Number.parseFloat((car.range || "").replace(/[^\d.]/g, "")) < range) return false;
+  if (activeFilters.length > 0 && accel && Number.parseFloat((car.accel || "").replace(/[^\d.]/g, "")) > accel) return false;
   return true;
+}
+
+function getRangeValue(car) {
+  return Number.parseFloat(String(car.range || "").replace(/[^\d.]/g, "")) || 0;
 }
 
 export default function ComparisonWrapper({ allCars }) {
   const [selectedCars, setSelectedCars] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [showAllCars, setShowAllCars] = useState(false);
   const [detailCar, setDetailCar] = useState(null);
   const [detailData, setDetailData] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -34,10 +40,22 @@ export default function ComparisonWrapper({ allCars }) {
   const comparisonScrollRef = useRef(null);
   const detailRequestRef = useRef(0);
   const { language } = useLanguage();
-  const { filters, hasActiveFilters } = useFilters();
-  const displayCars = hasActiveFilters
-    ? allCars.filter((car) => matchesFilters(car, filters))
-    : allCars.slice(0, 12);
+  const { filters, activeFilters, hasActiveFilters } = useFilters();
+  const featuredCars = [...allCars]
+    .sort((a, b) => getRangeValue(b) - getRangeValue(a))
+    .filter((car, index, cars) =>
+      cars.findIndex((candidate) => candidate.brand === car.brand) === index
+    )
+    .slice(0, 3);
+  const matchingCars = hasActiveFilters
+    ? allCars.filter((car) => matchesFilters(car, filters, activeFilters))
+    : allCars;
+  const visibleCars = hasActiveFilters || showAllCars ? matchingCars : featuredCars;
+  const detailCarName = detailCar
+    ? detailCar.model.toLocaleLowerCase(language).startsWith(`${detailCar.brand} `.toLocaleLowerCase(language))
+      ? detailCar.model
+      : `${detailCar.brand} ${detailCar.model}`
+    : "";
 
   useEffect(() => {
     if (!detailCar && !showComparison) return undefined;
@@ -136,8 +154,8 @@ export default function ComparisonWrapper({ allCars }) {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`${detailCar.brand} ${detailCar.model}`}
-          className="fixed inset-0 z-[1200] overflow-y-auto bg-slate-950/70 p-0 backdrop-blur-sm sm:p-5"
+          aria-label={detailCarName}
+          className="fixed inset-0 z-[1200] overflow-y-auto bg-slate-900/55 p-0 backdrop-blur-sm sm:p-5"
           onClick={(event) => {
             if (event.target === event.currentTarget) closeVehicleDetails();
           }}
@@ -151,12 +169,12 @@ export default function ComparisonWrapper({ allCars }) {
             }
           }}
         >
-          <div className="relative mx-auto min-h-full max-w-7xl overflow-hidden bg-slate-50 shadow-2xl sm:rounded-[2rem]">
+          <div className="relative mx-auto min-h-full max-w-[1320px] overflow-hidden bg-[#f5f7fa] shadow-2xl sm:rounded-[26px]">
             <button
               type="button"
               onClick={closeVehicleDetails}
               aria-label={getMessage(language, "close")}
-              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl font-bold text-slate-700 shadow-md transition hover:bg-slate-100"
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-2xl font-bold text-slate-700 shadow-md transition hover:border-lime-400 hover:bg-lime-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-600"
             >
               ×
             </button>
@@ -195,12 +213,11 @@ export default function ComparisonWrapper({ allCars }) {
           <ScrollToTop
             bottomClassName={selectedCars.length > 0 ? "bottom-56 md:bottom-32" : "bottom-6"}
           />
-          {displayCars.length > 0 ? (
+          {visibleCars.length > 0 ? (
             <div
-              className="grid w-full justify-items-center gap-6"
-              style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))" }}
+              className="ev-car-grid grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3"
             >
-              {displayCars.map((car) => (
+              {visibleCars.map((car) => (
                 <EVCard
                   key={car.id}
                   car={car}
@@ -213,6 +230,19 @@ export default function ComparisonWrapper({ allCars }) {
           ) : (
             <div className="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white py-20 text-center text-slate-400">
               {getMessage(language, "noMatchingCars")}
+            </div>
+          )}
+
+          {!hasActiveFilters && !showAllCars && matchingCars.length > visibleCars.length && (
+            <div className="mt-7 text-center">
+              <button
+                type="button"
+                onClick={() => setShowAllCars(true)}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 transition hover:border-slate-500 hover:bg-slate-50"
+              >
+                {getMessage(language, "viewAllModels")}
+                <span aria-hidden="true">→</span>
+              </button>
             </div>
           )}
 
@@ -232,7 +262,7 @@ export default function ComparisonWrapper({ allCars }) {
                 </div>
                 <button
                   onClick={goToCompare}
-                  className="w-full rounded-2xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-[0_16px_40px_rgba(59,130,246,0.4)] transition hover:bg-blue-500 md:w-auto"
+                  className="w-full rounded-full bg-[#9bea21] px-6 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-[#8bd91a] md:w-auto"
                 >
                   {getMessage(language, "compare")} ({selectedCars.length})
                 </button>

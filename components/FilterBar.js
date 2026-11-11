@@ -6,19 +6,11 @@ import { useFilters } from "./FilterProvider";
 import { getMessage, getSegmentTranslation, getBodyStyleTranslation } from "@/lib/i18n";
 
 function FilterSlider({ id, label, value, min, max, step = 1, formatValue, onChange }) {
-  const [draftValue, setDraftValue] = useState(String(value));
-
-  const commitValue = (nextValue) => {
-    const numericValue = Number(nextValue);
-    setDraftValue(String(numericValue));
-    if (numericValue !== Number(value)) onChange(numericValue);
-  };
-
   return (
-    <div className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200/80">
-      <div className="mb-2 flex items-center justify-between gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+    <div className="filter-field rounded-xl bg-white p-3">
+      <div className="mb-2 flex items-center justify-between gap-2 text-[11px] font-bold text-slate-600">
         <label htmlFor={id}>{label}</label>
-        <span className="text-blue-600">{formatValue(draftValue)}</span>
+        <span className="text-slate-800">{formatValue(value)}</span>
       </div>
       <input
         id={id}
@@ -26,12 +18,9 @@ function FilterSlider({ id, label, value, min, max, step = 1, formatValue, onCha
         min={min}
         max={max}
         step={step}
-        value={draftValue}
-        onChange={(event) => setDraftValue(event.target.value)}
-        onPointerUp={(event) => commitValue(event.currentTarget.value)}
-        onKeyUp={(event) => commitValue(event.currentTarget.value)}
-        onBlur={(event) => commitValue(event.currentTarget.value)}
-        className="w-full accent-blue-600"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="w-full accent-lime-500"
       />
     </div>
   );
@@ -113,8 +102,8 @@ function SearchableFilter({
   };
 
   return (
-    <div className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200/80">
-      <label htmlFor={id} className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">{label}</label>
+    <div className="filter-field rounded-xl bg-white p-3">
+      <label htmlFor={id} className="mb-2 block text-[11px] font-bold text-slate-600">{label}</label>
       <div className="relative" ref={filterRef}>
         <button
           ref={triggerRef}
@@ -127,7 +116,7 @@ function SearchableFilter({
             setSearch("");
             setOpenFilter(isOpen ? null : id);
           }}
-          className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left text-xs font-semibold text-slate-800 outline-none transition focus:border-lime-500 focus:ring-2 focus:ring-lime-100"
         >
           <span>{selectedOption?.label || allLabel}</span>
           <span aria-hidden="true" className="text-slate-400">{isOpen ? "▲" : "▼"}</span>
@@ -150,7 +139,7 @@ function SearchableFilter({
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
               aria-controls={`${id}-options`}
-              className="mb-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mb-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-lime-500 focus:ring-2 focus:ring-lime-100"
             />
             <div
               id={`${id}-options`}
@@ -165,8 +154,8 @@ function SearchableFilter({
                 tabIndex={0}
                 onClick={() => selectOption("")}
                 onKeyDown={(event) => handleOptionKeyDown(event, "")}
-                className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none hover:bg-blue-50 focus:bg-blue-50 ${
-                  !value ? "bg-blue-50 text-blue-700" : ""
+                className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none hover:bg-lime-50 focus:bg-lime-50 ${
+                  !value ? "bg-lime-50 text-lime-800" : ""
                 }`}
               >
                 {allLabel}
@@ -179,8 +168,8 @@ function SearchableFilter({
                   tabIndex={0}
                   onClick={() => selectOption(option.value)}
                   onKeyDown={(event) => handleOptionKeyDown(event, option.value)}
-                  className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none hover:bg-blue-50 focus:bg-blue-50 ${
-                    value === option.value ? "bg-blue-50 text-blue-700" : ""
+                  className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none hover:bg-lime-50 focus:bg-lime-50 ${
+                    value === option.value ? "bg-lime-50 text-lime-800" : ""
                   }`}
                 >
                   {option.label}
@@ -235,12 +224,10 @@ export default function FilterBar({
   }));
 
   return (
-    <div className={`relative rounded-[2rem] border border-slate-200 bg-white/85 p-4 shadow-[0_24px_90px_-45px_rgba(37,99,235,0.7)] backdrop-blur-sm sm:p-6 ${
+    <div className={`filter-panel relative rounded-[18px] border border-slate-200/80 bg-white p-3 shadow-[0_12px_35px_-24px_rgba(15,23,42,0.35)] sm:p-3.5 ${
       openFilter ? "z-40" : ""
     }`}>
-      <div className="mb-4 flex items-center justify-end gap-3" />
-
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 xl:grid-cols-5">
         <SearchableFilter
           id="brand-filter"
           label={getMessage(language, "brand")}
@@ -257,7 +244,7 @@ export default function FilterBar({
               ...current,
               brand: option?.brand || "",
               model: option?.model || "",
-            }));
+            }), "brand");
           }}
           language={language}
           isOpen={openFilter === "brand-filter"}
@@ -271,7 +258,7 @@ export default function FilterBar({
           emptyMessage={getMessage(language, "noSegmentsFound")}
           options={segmentOptions}
           value={filters.segment}
-          onChange={(segment) => updateFilters((current) => ({ ...current, segment }))}
+          onChange={(segment) => updateFilters((current) => ({ ...current, segment }), "segment")}
           language={language}
           isOpen={openFilter === "segment-filter"}
           setOpenFilter={setOpenFilter}
@@ -284,7 +271,7 @@ export default function FilterBar({
           emptyMessage={getMessage(language, "noBodyStylesFound")}
           options={bodyStyleOptions}
           value={filters.bodyStyle}
-          onChange={(bodyStyle) => updateFilters((current) => ({ ...current, bodyStyle }))}
+          onChange={(bodyStyle) => updateFilters((current) => ({ ...current, bodyStyle }), "bodyStyle")}
           language={language}
           isOpen={openFilter === "body-style-filter"}
           setOpenFilter={setOpenFilter}
@@ -297,7 +284,7 @@ export default function FilterBar({
           min={100}
           max={1000}
           formatValue={(value) => `${value} km`}
-          onChange={(range) => updateFilters((current) => ({ ...current, range }))}
+          onChange={(range) => updateFilters((current) => ({ ...current, range }), "range")}
         />
         <FilterSlider
           id="acceleration-filter"
@@ -307,7 +294,7 @@ export default function FilterBar({
           max={15}
           step={0.1}
           formatValue={(value) => `${value} ${getMessage(language, "seconds")}`}
-          onChange={(accel) => updateFilters((current) => ({ ...current, accel }))}
+          onChange={(accel) => updateFilters((current) => ({ ...current, accel }), "accel")}
         />
       </div>
     </div>

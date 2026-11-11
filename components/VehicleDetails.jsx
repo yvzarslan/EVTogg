@@ -18,6 +18,10 @@ export default function VehicleDetails({
 }) {
   const { language } = useLanguage();
   const gallery = images.length > 0 ? images : car.image ? [car.image] : [];
+  const brandPrefix = `${car.brand} `;
+  const modelName = car.model.toLocaleLowerCase(language).startsWith(brandPrefix.toLocaleLowerCase(language))
+    ? car.model.slice(brandPrefix.length)
+    : car.model;
   const [activePhoto, setActivePhoto] = useState(0);
   const fullscreenTouchStartX = useRef(null);
   const photoButtonRef = useRef(null);
@@ -52,32 +56,39 @@ export default function VehicleDetails({
   }, [changePhoto, isPhotoExpanded]);
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-20">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700"
-        >
-          <span aria-hidden="true">←</span>
-          {getMessage(language, "backToVehicles")}
-        </button>
+    <main className="min-h-screen bg-[#f5f7fa] pb-20 text-slate-900">
+      <div className="mx-auto max-w-[1320px] px-4 py-5 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden rounded-[26px] bg-[#edf2f7] px-6 py-7 pr-16 sm:px-10 sm:py-9 sm:pr-20">
+          <button
+            type="button"
+            onClick={onClose}
+            className="mb-6 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-lime-500 hover:bg-lime-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-600"
+          >
+            <span aria-hidden="true">←</span>
+            {getMessage(language, "backToVehicles")}
+          </button>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-lime-700">{car.brand}</p>
+          <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.04em] text-[#102447] sm:text-5xl">
+            {modelName}
+          </h1>
+          <p className="mt-3 text-sm font-semibold text-slate-600">{getMessage(language, "vehicleDetail")}</p>
+        </section>
 
-        <section className="mt-6 grid min-w-0 grid-cols-1 gap-8 rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_30px_90px_-55px_rgba(15,23,42,0.65)] sm:p-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10 lg:p-8">
+        <section className="mt-5 grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:gap-6">
           <div className="min-w-0">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-100 via-white to-blue-50">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-[#e6eef4]">
               {gallery.length > 0 ? (
                 <button
                   type="button"
                   ref={photoButtonRef}
                   onClick={() => onPhotoExpandedChange(true)}
                   aria-label={getMessage(language, "viewPhotoFullscreen")}
-                  className="absolute inset-0 block h-full w-full cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-blue-600"
+                  className="absolute inset-0 block h-full w-full cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-lime-600"
                 >
                 <Image
                   key={gallery[activePhoto]}
                   src={gallery[activePhoto]}
-                  alt={`${car.brand} ${car.model}`}
+                  alt={`${car.brand} ${modelName}`}
                   fill
                   loading="eager"
                   sizes="(max-width: 1024px) 100vw, 60vw"
@@ -103,8 +114,8 @@ export default function VehicleDetails({
                     onClick={() => setActivePhoto(index)}
                     aria-label={`${getMessage(language, "photo")} ${index + 1}`}
                     aria-pressed={activePhoto === index}
-                    className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-xl border bg-slate-50 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
-                      activePhoto === index ? "border-blue-600 ring-2 ring-blue-100" : "border-slate-200 hover:border-blue-400"
+                      className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-xl border bg-slate-50 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-600 ${
+                      activePhoto === index ? "border-lime-500 ring-2 ring-lime-100" : "border-slate-200 hover:border-lime-400"
                     }`}
                   >
                     <Image
@@ -121,40 +132,27 @@ export default function VehicleDetails({
             )}
           </div>
 
-          <div className="flex min-w-0 flex-col justify-center">
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-blue-600">
-              {car.brand}
-            </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              {car.model}
-            </h1>
-            <p className="mt-3 text-sm font-semibold text-slate-500">
-              {getMessage(language, "vehicleDetail")}
-            </p>
-
-            <div className="mt-8 grid gap-3">
-              {statistics.map(({ key, label, value, Icon }) => (
-                <div
-                  key={key}
-                  className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                    <Icon aria-hidden="true" size={24} strokeWidth={2.2} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-                      {getMessage(language, label)}
-                    </p>
-                    <p className="mt-1 break-words text-xl font-black text-slate-900">
-                      {value || getMessage(language, "unknown")}
-                    </p>
-                  </div>
+          <div className="grid min-w-0 content-start gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {statistics.map(({ key, label, value, Icon }) => (
+              <div
+                key={key}
+                className="flex items-center gap-4 rounded-[18px] border border-lime-100 bg-gradient-to-br from-white to-lime-50/70 p-4 shadow-[0_12px_30px_-26px_rgba(15,23,42,0.35)]"
+              >
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lime-100 text-lime-800">
+                  <Icon aria-hidden="true" size={24} strokeWidth={2.2} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                    {getMessage(language, label)}
+                  </p>
+                  <p className="mt-1 break-words text-xl font-black text-slate-900">
+                    {value || getMessage(language, "unknown")}
+                  </p>
                 </div>
-              ))}
-            </div>
-
+              </div>
+            ))}
             {!sourceAvailable && (
-              <p role="status" className="mt-4 text-sm leading-6 text-amber-700">
+              <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800 sm:col-span-2 lg:col-span-1">
                 {getMessage(language, "vehicleSourceUnavailable")}
               </p>
             )}
@@ -164,12 +162,12 @@ export default function VehicleDetails({
         {(car.realRangeEstimation || car.longDistanceSuitability) && (
           <section className="mt-8 grid gap-6 lg:grid-cols-2">
             {car.realRangeEstimation?.values?.length > 0 && (
-              <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <article className="rounded-[18px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
                 <div className="mb-5">
                   <h2 className="text-xl font-black text-slate-900">
                     {getMessage(language, "realRangeEstimation")}
                   </h2>
-                  <p className="mt-2 text-sm font-bold text-blue-700">
+                  <p className="mt-2 text-sm font-bold text-lime-800">
                     {new Intl.NumberFormat(language).format(car.realRangeEstimation.min)}
                     {"–"}
                     {new Intl.NumberFormat(language).format(car.realRangeEstimation.max)}
@@ -179,7 +177,7 @@ export default function VehicleDetails({
                 </div>
                 <dl className="grid gap-2 sm:grid-cols-2">
                   {car.realRangeEstimation.values.map(({ label, value }, index) => (
-                    <div key={`${label}-${index}`} className="rounded-xl bg-slate-50 p-3">
+                    <div key={`${label}-${index}`} className="rounded-xl bg-[#f5f7fa] p-3">
                       <dt className="text-xs font-semibold text-slate-500">
                         {getVehicleDetailRowLabel(language, label, value)}
                       </dt>
@@ -191,7 +189,7 @@ export default function VehicleDetails({
             )}
 
             {car.longDistanceSuitability?.values?.length > 0 && (
-              <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <article className="rounded-[18px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
                 <div className="mb-5">
                   <h2 className="text-xl font-black text-slate-900">
                     {getMessage(language, "longDistanceSuitability")}
@@ -199,7 +197,7 @@ export default function VehicleDetails({
                 </div>
                 <dl className="grid gap-2 sm:grid-cols-2">
                   {car.longDistanceSuitability.values.map(({ label, value }, index) => (
-                    <div key={`${label}-${index}`} className="rounded-xl bg-slate-50 p-3">
+                    <div key={`${label}-${index}`} className="rounded-xl bg-[#f5f7fa] p-3">
                       <dt className="text-xs font-semibold text-slate-500">
                         {getVehicleDetailRowLabel(language, label, value)}
                       </dt>
@@ -268,7 +266,7 @@ export default function VehicleDetails({
               <Image
                 key={`fullscreen-${gallery[activePhoto]}`}
                 src={gallery[activePhoto]}
-                alt={`${car.brand} ${car.model} — ${getMessage(language, "photo")} ${activePhoto + 1}`}
+                alt={`${car.brand} ${modelName} — ${getMessage(language, "photo")} ${activePhoto + 1}`}
                 fill
                 loading="eager"
                 sizes="100vw"
@@ -280,7 +278,7 @@ export default function VehicleDetails({
 
         <section className="mt-10">
           <div className="mb-5 flex items-center gap-3">
-            <span className="h-8 w-1.5 rounded-full bg-blue-600" />
+            <span className="h-8 w-1.5 rounded-full bg-lime-500" />
             <h2 className="text-2xl font-black tracking-tight text-slate-900">
               {getMessage(language, "vehicleSpecifications")}
             </h2>
@@ -291,9 +289,9 @@ export default function VehicleDetails({
               return (
                 <article
                   key={key}
-                  className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  className="flex items-center gap-4 rounded-[18px] border border-slate-200/80 bg-white p-4 shadow-sm"
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lime-50 text-lime-700">
                     <Icon aria-hidden="true" size={21} />
                   </span>
                   <div className="min-w-0">
