@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SiteHeader />
           <aside
             role="note"
-            className="border-y border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-xs font-medium leading-5 text-amber-950 sm:text-sm"
+            className="border-b border-slate-200 bg-slate-50 px-4 py-1.5 text-center text-[11px] leading-4 text-slate-600 sm:text-xs"
           >
             {getMessage(language, 'brandNotice')}
           </aside>
