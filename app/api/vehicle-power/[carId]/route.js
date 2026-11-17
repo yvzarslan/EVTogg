@@ -15,6 +15,6 @@ export async function GET(_request, { params }) {
   const details = await getVehicleDetails(car);
   return Response.json(
     { power: details.power },
-    { headers: { "Cache-Control": "no-store" } }
+    { headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" } }
   );
 }

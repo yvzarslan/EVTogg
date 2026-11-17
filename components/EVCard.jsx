@@ -2,33 +2,104 @@
 
 import Image from "next/image";
 import { Hand, Heart } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./LanguageProvider";
 import { getMessage, getVehicleValue } from "@/lib/i18n";
 
 const cardSpecs = [
   { key: "range", labelKey: "rangeFilter", icon: "↗" },
+  { key: "power", labelKey: "specPowerCard", icon: "⚡" },
   { key: "accel", labelKey: "accelerationFilter", icon: "ϟ" },
   { key: "efficiency", labelKey: "specEfficiency", icon: "⌁" },
 ];
 
-export default function EVCard({ car, isSelected, onSelect, onDetails }) {
+function formatPower(power, language) {
+  if (!power) return "";
+
+  const horsepower = String(power).match(/([\d.,]+)\s*(PS|hp)\b/i);
+  if (!horsepower) return power;
+
+  const unit = language === "tr" ? "bg" : horsepower[2].toUpperCase();
+  return `${horsepower[1]} ${unit}`;
+}
+
+export default function EVCard({ car, isSelected, onSelect, onDetails, isFeatured }) {
   const { language } = useLanguage();
+  const cardRef = useRef(null);
+  const [shouldLoadPower, setShouldLoadPower] = useState(false);
+  const [power, setPower] = useState(car?.power || "");
+
+  useEffect(() => {
+    if (car?.power) {
+      setPower(car.power);
+      return undefined;
+    }
+
+    if (isFeatured) {
+      setShouldLoadPower(true);
+      return undefined;
+    }
+
+    const cardElement = cardRef.current;
+    if (!cardElement || !("IntersectionObserver" in window)) {
+      setShouldLoadPower(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShouldLoadPower(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "200px" });
+
+    observer.observe(cardElement);
+    return () => observer.disconnect();
+  }, [car?.id, car?.power, isFeatured]);
+
+  useEffect(() => {
+    if (!shouldLoadPower || car?.power || !car?.id) return undefined;
+
+    const controller = new AbortController();
+    const loadPower = async () => {
+      try {
+        const response = await fetch(`/api/vehicle-power/${encodeURIComponent(car.id)}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Vehicle power request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (typeof data.power === "string") setPower(data.power);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error(`Araç gücü yüklenemedi (${car.id}):`, error);
+        }
+      }
+    };
+
+    loadPower();
+    return () => controller.abort();
+  }, [car?.id, car?.power, shouldLoadPower]);
 
   if (!car) return null;
+  const displayedPower = formatPower(power, language);
+  const carWithPower = { ...car, power: displayedPower };
   const modelName = car.model.toLocaleLowerCase(language).startsWith(car.brand.toLocaleLowerCase(language))
     ? car.model
     : `${car.brand} ${car.model}`;
 
   return (
-    <article className={`ev-card group relative flex h-full flex-col overflow-hidden rounded-[16px] border bg-white transition duration-300 hover:-translate-y-1 ${
+    <article ref={cardRef} className={`ev-card group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition duration-300 hover:-translate-y-1 ${
       isSelected ? "border-lime-500 ring-2 ring-lime-100" : "border-slate-200/80"
     }`}>
-      <div className="group/image relative h-[190px] overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-[#e6eef4]">
+      <div className="group/image relative h-47.5 overflow-hidden bg-linear-to-br from-slate-100 via-slate-50 to-[#e6eef4]">
         <button
           type="button"
           onClick={onDetails}
           aria-label={modelName}
-          className="absolute inset-0 h-full w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-lime-600"
+          className="absolute inset-0 h-full w-full cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-lime-600"
         >
           <Image
             src={car.image}
@@ -70,7 +141,7 @@ export default function EVCard({ car, isSelected, onSelect, onDetails }) {
           </h3>
         </button>
 
-        <div className="grid grid-cols-3 divide-x divide-slate-200 border-y border-slate-100 py-3">
+        <div className="grid grid-cols-4 divide-x divide-slate-200 border-y border-slate-100 py-3">
           {cardSpecs.map(({ key, labelKey, icon }) => (
             <div key={key} className="min-w-0 px-2 first:pl-0 last:pr-0">
               <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
@@ -78,7 +149,7 @@ export default function EVCard({ car, isSelected, onSelect, onDetails }) {
                 <span className="truncate">{getMessage(language, labelKey)}</span>
               </span>
               <span className="mt-1 block truncate text-xs font-extrabold text-[#1c3150]">
-                {getVehicleValue(language, car, key) || "—"}
+                {getVehicleValue(language, key === "power" ? carWithPower : car, key) || "—"}
               </span>
             </div>
           ))}

@@ -9,6 +9,8 @@ import { useLanguage } from "./LanguageProvider";
 import { useFilters } from "./FilterProvider";
 import { getMessage } from "@/lib/i18n";
 
+const MODEL_PAGE_SIZE = 60;
+
 function matchesFilters(car, filters, activeFilters) {
   const brand = filters.brand?.toLowerCase();
   const range = Number(filters.range);
@@ -36,7 +38,7 @@ function getRangeValue(car) {
 export default function ComparisonWrapper({ allCars }) {
   const [selectedCars, setSelectedCars] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [showAllCars, setShowAllCars] = useState(false);
+  const [visibleCarCount, setVisibleCarCount] = useState(MODEL_PAGE_SIZE);
   const [detailCar, setDetailCar] = useState(null);
   const [detailData, setDetailData] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -46,6 +48,7 @@ export default function ComparisonWrapper({ allCars }) {
   const detailRequestRef = useRef(0);
   const { language } = useLanguage();
   const { filters, activeFilters, hasActiveFilters } = useFilters();
+  const filtersKey = JSON.stringify([filters, activeFilters]);
   const featuredCars = [...allCars]
     .sort((a, b) => getRangeValue(b) - getRangeValue(a))
     .filter((car, index, cars) =>
@@ -55,12 +58,18 @@ export default function ComparisonWrapper({ allCars }) {
   const matchingCars = hasActiveFilters
     ? allCars.filter((car) => matchesFilters(car, filters, activeFilters))
     : allCars;
-  const visibleCars = hasActiveFilters || showAllCars ? matchingCars : featuredCars;
+  const visibleCars = hasActiveFilters
+    ? matchingCars.slice(0, visibleCarCount)
+    : featuredCars;
   const detailCarName = detailCar
     ? detailCar.model.toLocaleLowerCase(language).startsWith(`${detailCar.brand} `.toLocaleLowerCase(language))
       ? detailCar.model
       : `${detailCar.brand} ${detailCar.model}`
     : "";
+
+  useEffect(() => {
+    setVisibleCarCount(MODEL_PAGE_SIZE);
+  }, [filtersKey]);
 
   useEffect(() => {
     if (!detailCar && !showComparison) return undefined;
@@ -160,7 +169,7 @@ export default function ComparisonWrapper({ allCars }) {
           role="dialog"
           aria-modal="true"
           aria-label={detailCarName}
-          className="fixed inset-0 z-[1200] overflow-y-auto bg-slate-900/55 p-0 backdrop-blur-sm sm:p-5"
+          className="fixed inset-0 z-1200 overflow-y-auto bg-slate-900/55 p-0 backdrop-blur-sm sm:p-5"
           onClick={(event) => {
             if (event.target === event.currentTarget) closeVehicleDetails();
           }}
@@ -174,7 +183,7 @@ export default function ComparisonWrapper({ allCars }) {
             }
           }}
         >
-          <div className="relative mx-auto min-h-full max-w-[1320px] overflow-hidden bg-[#f5f7fa] shadow-2xl sm:rounded-[26px]">
+          <div className="relative mx-auto min-h-full max-w-330 overflow-hidden bg-[#f5f7fa] shadow-2xl sm:rounded-[26px]">
             <button
               type="button"
               onClick={closeVehicleDetails}
@@ -207,7 +216,7 @@ export default function ComparisonWrapper({ allCars }) {
         </div>
       )}
       {showComparison ? (
-        <div className="fixed inset-0 z-[1100] bg-slate-100">
+        <div className="fixed inset-0 z-1100 bg-slate-100">
           <div ref={comparisonScrollRef} className="h-full overflow-y-auto">
             <VehicleComparison selectedCars={selectedCars} onEditSelection={() => setShowComparison(false)} />
           </div>
@@ -229,6 +238,7 @@ export default function ComparisonWrapper({ allCars }) {
                   isSelected={selectedCars.some((c) => c.id === car.id)}
                   onSelect={() => evcarleSelection(car)}
                   onDetails={() => showVehicleDetails(car)}
+                  isFeatured={featuredCars.some((featuredCar) => featuredCar.id === car.id)}
                 />
               ))}
             </div>
@@ -238,21 +248,24 @@ export default function ComparisonWrapper({ allCars }) {
             </div>
           )}
 
-          {!hasActiveFilters && !showAllCars && matchingCars.length > visibleCars.length && (
+          {hasActiveFilters && matchingCars.length > visibleCars.length && (
             <div className="mt-7 text-center">
               <button
                 type="button"
-                onClick={() => setShowAllCars(true)}
+                onClick={(event) => {
+                  event.currentTarget.blur();
+                  setVisibleCarCount((count) => Math.min(count + MODEL_PAGE_SIZE, matchingCars.length));
+                }}
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 transition hover:border-slate-500 hover:bg-slate-50"
               >
-                {getMessage(language, "viewAllModels")}
+                {getMessage(language, "loadMoreModels")}
                 <span aria-hidden="true">→</span>
               </button>
             </div>
           )}
 
           {selectedCars.length > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-200 bg-white/90 p-4 shadow-[0_-15px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl md:p-5">
+            <div className="fixed bottom-0 left-0 right-0 z-1000 border-t border-slate-200 bg-white/90 p-4 shadow-[0_-15px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl md:p-5">
               <div className="container mx-auto flex flex-col items-center justify-between gap-4 md:flex-row">
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   {selectedCars.map((car) => (
@@ -260,7 +273,7 @@ export default function ComparisonWrapper({ allCars }) {
                       <div className="relative h-8 w-10 overflow-hidden rounded-lg bg-white">
                         <Image src={car.image} alt={car.model} fill className="object-contain" sizes="40px" />
                       </div>
-                      <span className="max-w-[90px] truncate text-xs font-bold text-slate-800">{car.model}</span>
+                      <span className="max-w-22.5 truncate text-xs font-bold text-slate-800">{car.model}</span>
                       <button onClick={() => evcarleSelection(car)} className="absolute right-2 text-sm font-black text-red-500">✕</button>
                     </div>
                   ))}
